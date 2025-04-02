@@ -25,15 +25,16 @@ public class User implements UserDetails {
     @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String firstName;
+    @Column(nullable = false)
     private String lastName;
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = false)
     private String password;
     private String phoneNumber;
-    private Date birhdate;
+    private Date birhdate; //
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
