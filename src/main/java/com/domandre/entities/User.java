@@ -9,10 +9,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @Entity
@@ -34,10 +31,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     private String phoneNumber;
-    private Date birhdate; //
+    @Temporal(TemporalType.DATE)
+    private Date birthdate; //
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> patientAppointments = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
