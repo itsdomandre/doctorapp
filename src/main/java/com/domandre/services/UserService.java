@@ -35,7 +35,10 @@ public class UserService implements UserDetailsService {
         if (!(principal instanceof org.springframework.security.core.userdetails.User userDetails)) {
             throw new RuntimeException("User not authenticated");
         }
-        return userRepository.findByEmail(userDetails.getUsername())
+        String email = userDetails.getUsername();
+        System.out.println("Authenticated user: " + email);
+
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 

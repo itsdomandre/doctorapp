@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**",
+                                "/api/appointment/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll() // TODO: Logout wont be public
                         .requestMatchers(HttpMethod.DELETE, "/api/authors/**").hasRole("ADMIN")

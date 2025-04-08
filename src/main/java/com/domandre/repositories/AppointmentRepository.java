@@ -1,10 +1,13 @@
 package com.domandre.repositories;
 
 import com.domandre.entities.Appointment;
+import com.domandre.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface AppointmentRepository extends JpaRepository<Long, Appointment> {
+import java.util.List;
 
+@Repository
+public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    List<Appointment> findByPatient(User patient);
 }

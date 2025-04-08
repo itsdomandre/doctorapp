@@ -5,20 +5,26 @@ import com.domandre.entities.Appointment;
 import com.domandre.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/appointment")
+@RequestMapping("/api/appointment")
 
 public class AppointmentController {
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
+
+    @GetMapping("/myAppointments")
+    public ResponseEntity<List<Appointment>> getMyAppointments() {
+        List<Appointment> appointments = appointmentService.getAppointmentsByUser();
+        return ResponseEntity.ok(appointments);
+    }
 
     @PostMapping("/create")
-    public ResponseEntity<Appointment> createAppointment(@RequestBody AppointmentRequest request) {
-        return ResponseEntity.ok(appointmentService.createAppointment(request));
+    public ResponseEntity<?> createAppointment(@RequestBody AppointmentRequest request) {
+        Appointment appointment = appointmentService.createAppointment(request);
+        return ResponseEntity.ok(appointment);
     }
 }
