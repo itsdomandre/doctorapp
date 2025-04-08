@@ -3,6 +3,7 @@ package com.domandre.controllers;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.entities.Appointment;
 import com.domandre.services.AppointmentService;
+import com.domandre.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final UserService userService;
 
     @GetMapping("/myAppointments")
     public ResponseEntity<List<Appointment>> getMyAppointments() {

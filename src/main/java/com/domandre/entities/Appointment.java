@@ -1,6 +1,8 @@
 package com.domandre.entities;
 
 import com.domandre.enums.AppointmentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Appointment {
 
     @Id
@@ -21,6 +24,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
+    @JsonIgnore
     private User patient;
 
     private LocalDateTime appointmentDate;

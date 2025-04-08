@@ -29,17 +29,8 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public User getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (!(principal instanceof org.springframework.security.core.userdetails.User userDetails)) {
-            throw new RuntimeException("User not authenticated");
-        }
-        String email = userDetails.getUsername();
-        System.out.println("Authenticated user: " + email);
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public static User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }

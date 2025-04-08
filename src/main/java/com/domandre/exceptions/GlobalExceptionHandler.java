@@ -20,4 +20,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?>handleBadCredentialsException (BadCredentialsException ex){
         return new ResponseEntity<>("Invalid Credentials. Please Try again.",HttpStatus.UNAUTHORIZED);
     }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
