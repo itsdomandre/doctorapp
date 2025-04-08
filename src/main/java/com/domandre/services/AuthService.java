@@ -35,7 +35,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
-        user.setBirhdate(request.getBirthdate());
+        user.setBirthdate(request.getBirthdate());
         Role role = request.getRole() != null ? request.getRole() : Role.USER;
         user.setRole(role);
 

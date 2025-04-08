@@ -38,7 +38,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Appointment> patientAppointments = new ArrayList<>();
+    private List<Appointment> patientAppointments;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){

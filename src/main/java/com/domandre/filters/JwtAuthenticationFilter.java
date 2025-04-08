@@ -1,6 +1,5 @@
 package com.domandre.filters;
 
-
 import com.domandre.config.JwtTokenProvider;
 import com.domandre.services.UserService;
 import jakarta.servlet.FilterChain;
@@ -13,19 +12,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.RequiredArgsConstructor; // Importando a anotação
 
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor // Lombok vai gerar o construtor para os campos finais
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final UserService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, UserService userDetailsService) {
-        this.tokenProvider = tokenProvider;
-        this.userDetailsService = userDetailsService;
-    }
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
