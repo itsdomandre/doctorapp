@@ -9,5 +9,4 @@ import java.util.UUID;
 public class AppointmentRequest {
     private LocalDateTime appointmentDate;
     private String notes;
-    private UUID doctorId;
 }

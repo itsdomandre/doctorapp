@@ -1,6 +1,7 @@
 package com.domandre.entities;
 
 import com.domandre.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,8 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +36,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     private String phoneNumber;
-    private Date birhdate; //
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
+    private LocalDate birhdate;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;

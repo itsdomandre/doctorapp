@@ -23,21 +23,18 @@ public class AppointmentService {
 
     public Appointment createAppointment(AppointmentRequest request) {
         User patient = UserService.getCurrentUser();
-
-        User doctor = userRepository.findById(request.getDoctorId()).orElseThrow(() -> new RuntimeException("Doctor not found"));
-        if (doctor.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Please, select a Doctor");
-        }
-
         Appointment appointment = Appointment.builder()
                 .patient(patient)
                 .appointmentDate(request.getAppointmentDate())
                 .patient(patient)
-                .doctor(doctor)
                 .notes(request.getNotes())
                 .status(AppointmentStatus.REQUESTED)
                 .build();
         return appointmentRepository.save(appointment);
+    }
+
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
     }
 
     public List<Appointment> getAppointmentsByUser() {

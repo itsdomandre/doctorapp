@@ -3,14 +3,13 @@ package com.domandre.controllers.request;
 import com.domandre.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -27,9 +26,9 @@ public class RegisterRequest {
     private String password;
     @NotBlank(message = "The field phoneNumber is missing")
     private String phoneNumber;
-    // @NotNull(message = "The field birthdate is missing")
+
     @DateTimeFormat(pattern = "yyyyMMdd")
-    private Date birthdate;
+    private LocalDate birthdate;
     private Role role;
 
     //TODO Printar campos sensíveis de forma a seguir os padrões da LGPD
