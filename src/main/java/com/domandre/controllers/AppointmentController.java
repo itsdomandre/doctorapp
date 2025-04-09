@@ -37,8 +37,8 @@ public class AppointmentController {
     @PutMapping("/update/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateAppointment(@PathVariable Long id, @RequestBody UpdateAppointmentStatusRequest request) {
-        Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus());
-        return ResponseEntity.noContent().build();
+        Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
+        return ResponseEntity.ok(updated);
     }
 
 

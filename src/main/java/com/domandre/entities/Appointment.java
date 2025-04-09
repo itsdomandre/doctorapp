@@ -33,5 +33,9 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.REQUESTED;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private User doctor;
     private String notes;
 }
