@@ -42,4 +42,8 @@ public class AppointmentService {
         return appointmentRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
     }
+
+    public List<Appointment> getAppointmentsForCurrentUser(User currentUser) {
+        return appointmentRepository.findByPatient(currentUser);
+    }
 }
