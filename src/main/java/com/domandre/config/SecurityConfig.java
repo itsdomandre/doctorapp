@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll() // TODO: Logout wont be public
-                        .requestMatchers(HttpMethod.DELETE, "/api/authors/**").hasRole("ADMIN")
+                        //.requestMatchers(HttpMethod.DELETE, "/api/authors/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
