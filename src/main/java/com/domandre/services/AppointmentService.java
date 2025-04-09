@@ -46,4 +46,11 @@ public class AppointmentService {
     public List<Appointment> getAppointmentsForCurrentUser(User currentUser) {
         return appointmentRepository.findByPatient(currentUser);
     }
+
+    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        appointment.setStatus(newStatus);
+        return appointmentRepository.save(appointment);
+    }
 }

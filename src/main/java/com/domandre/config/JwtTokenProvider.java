@@ -45,6 +45,7 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+        System.out.println("🛡️ Validando token...");
         try {
             if (invalidTokenRepository.existsByToken(token)) {
                 return false;
@@ -52,6 +53,7 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
+            System.out.println("❗Token inválido: " + ex.getMessage());
             return false;
         }
     }

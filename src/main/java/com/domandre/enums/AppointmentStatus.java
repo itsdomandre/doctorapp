@@ -2,7 +2,7 @@ package com.domandre.enums;
 
 public enum AppointmentStatus {
     REQUESTED,
-    CONFIRMED,
+    APPROVED,
     REJECTED,
     CANCELLED,
     COMPLETED
