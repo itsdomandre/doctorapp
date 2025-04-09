@@ -1,14 +1,20 @@
 package com.domandre.entities;
 
 import com.domandre.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.*;
 
 @Data
@@ -31,8 +37,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     private String phoneNumber;
-    @Temporal(TemporalType.DATE)
-    private Date birthdate; //
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
+    private LocalDate birhdate;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -42,9 +48,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        return List.of(role);
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
-
     @Override
     public String getUsername() {
         return email;
