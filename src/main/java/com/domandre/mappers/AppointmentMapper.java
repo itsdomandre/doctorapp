@@ -1,6 +1,6 @@
 package com.domandre.mappers;
 
-import com.domandre.DTOs.AppointmentDTO;
+import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 
 public class AppointmentMapper {

@@ -1,4 +1,4 @@
-package com.domandre.DTOs;
+package com.domandre.controllers.response;
 
 import com.domandre.enums.AppointmentStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
