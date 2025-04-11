@@ -28,7 +28,7 @@ public class AppointmentService {
         User patient = UserService.getCurrentUser();
         Appointment appointment = Appointment.builder()
                 .patient(patient)
-                .dateTime(request.getDateTime())
+                .createdAt(request.getDateTime())
                 .patient(patient)
                 .procedure(request.getProcedure())
                 .notes(request.getNotes())

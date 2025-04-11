@@ -31,7 +31,7 @@ public class Appointment {
     private User patient;
 
     @Column(name = "dateTime")
-    private LocalDateTime dateTime;
+    private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.REQUESTED;
