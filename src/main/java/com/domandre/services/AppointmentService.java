@@ -1,11 +1,14 @@
 package com.domandre.services;
 
+import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.request.AppointmentRequest;
+import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
 import com.domandre.exceptions.ResourceNotFoundException;
+import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +28,9 @@ public class AppointmentService {
         User patient = UserService.getCurrentUser();
         Appointment appointment = Appointment.builder()
                 .patient(patient)
-                .appointmentDate(request.getAppointmentDate())
+                .createdAt(request.getDateTime())
                 .patient(patient)
+                .procedure(request.getProcedure())
                 .notes(request.getNotes())
                 .status(AppointmentStatus.REQUESTED)
                 .build();
@@ -71,4 +75,21 @@ public class AppointmentService {
         }
         return appointmentRepository.save(appointment);
     }
+
+    public Appointment fillAnamnesis(Long appointmentId, AnamnesisRequest request) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        if (appointment.getAnamnesis() != null) {
+            throw new RuntimeException("Anamnesis was filled");
+        }
+        if (appointment.getStatus() != AppointmentStatus.APPROVED){
+            throw new RuntimeException("Appointment is not Approved. Contact the Administrator.");
+        }
+
+        Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
+        appointment.setAnamnesis(anamnesis);
+
+        return appointmentRepository.save(appointment);
+    }
+
 }

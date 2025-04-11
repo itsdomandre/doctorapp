@@ -1,6 +1,7 @@
 package com.domandre.entities;
 
 import com.domandre.enums.AppointmentStatus;
+import com.domandre.enums.Procedures;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -29,7 +30,8 @@ public class Appointment {
     @JsonIgnore
     private User patient;
 
-    private LocalDateTime appointmentDate;
+    @Column(name = "dateTime")
+    private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.REQUESTED;
@@ -37,5 +39,15 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private User doctor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Procedures procedure;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "anamnesis_id")
+    private Anamnesis anamnesis;
+
+    private LocalDateTime updatedAt;
     private String notes;
 }

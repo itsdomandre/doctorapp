@@ -1,6 +1,6 @@
 package com.domandre.controllers;
 
-import com.domandre.DTOs.AppointmentDTO;
+import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.controllers.request.UpdateAppointmentStatusRequest;
 import com.domandre.entities.Appointment;
