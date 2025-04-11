@@ -1,8 +1,8 @@
 package com.domandre.controllers;
 
 import com.domandre.DTOs.AnamnesisDTO;
-import com.domandre.DTOs.AppointmentDTO;
 import com.domandre.controllers.request.AnamnesisRequest;
+import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.mappers.AnamnesisMapper;
