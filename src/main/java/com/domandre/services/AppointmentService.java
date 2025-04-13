@@ -1,7 +1,5 @@
 package com.domandre.services;
 
-import com.domandre.helpers.BusinessHoursHelper;
-import com.domandre.helpers.BusinessHoursHelper.TimeRange;
 import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.entities.Anamnesis;
@@ -10,6 +8,8 @@ import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
 import com.domandre.exceptions.ResourceNotFoundException;
+import com.domandre.helpers.BusinessHoursHelper;
+import com.domandre.helpers.BusinessHoursHelper.TimeRange;
 import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
@@ -90,7 +90,7 @@ public class AppointmentService {
         if (appointment.getAnamnesis() != null) {
             throw new RuntimeException("Anamnesis was filled");
         }
-        if (appointment.getStatus() != AppointmentStatus.APPROVED){
+        if (appointment.getStatus() != AppointmentStatus.APPROVED) {
             throw new RuntimeException("Appointment is not Approved. Contact the Administrator.");
         }
 
@@ -100,9 +100,9 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    public List<LocalTime> getAvailableSlots(LocalDate date){
+    public List<LocalTime> getAvailableSlots(LocalDate date) {
         Optional<TimeRange> rangeOptional = BusinessHoursHelper.getBusinessHours(date.getDayOfWeek());
-        if (rangeOptional.isEmpty()){
+        if (rangeOptional.isEmpty()) {
             return List.of();
         }
 
@@ -111,7 +111,7 @@ public class AppointmentService {
         LocalTime end = range.end().minusHours(1);
 
         List<LocalTime> allPossibleSlots = new ArrayList<>();
-        for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)){
+        for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)) {
             allPossibleSlots.add(time);
         }
 
