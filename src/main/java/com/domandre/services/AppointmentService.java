@@ -1,5 +1,7 @@
 package com.domandre.services;
 
+import com.domandre.helpers.BusinessHoursHelper;
+import com.domandre.helpers.BusinessHoursHelper.TimeRange;
 import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.entities.Anamnesis;
@@ -14,8 +16,14 @@ import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +36,7 @@ public class AppointmentService {
         User patient = UserService.getCurrentUser();
         Appointment appointment = Appointment.builder()
                 .patient(patient)
-                .createdAt(request.getDateTime())
+                .appointmentDate(request.getDateTime())
                 .patient(patient)
                 .procedure(request.getProcedure())
                 .notes(request.getNotes())
@@ -90,6 +98,45 @@ public class AppointmentService {
         appointment.setAnamnesis(anamnesis);
 
         return appointmentRepository.save(appointment);
+    }
+
+    public List<LocalTime> getAvailableSlots(LocalDate date){
+        Optional<TimeRange> rangeOptional = BusinessHoursHelper.getBusinessHours(date.getDayOfWeek());
+        if (rangeOptional.isEmpty()){
+            return List.of();
+        }
+
+        TimeRange range = rangeOptional.get();
+        LocalTime start = range.start();
+        LocalTime end = range.end().minusHours(1);
+
+        List<LocalTime> allPossibleSlots = new ArrayList<>();
+        for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)){
+            allPossibleSlots.add(time);
+        }
+
+        List<LocalDateTime> taken = appointmentRepository
+                .findAllByAppointmentDateBetween(date.atStartOfDay(), date.atTime(23, 59))
+                .stream()
+                .map(Appointment::getAppointmentDate)
+                .toList();
+
+        // Filtra os horários disponíveis (que ainda não foram agendados)
+        return allPossibleSlots.stream()
+                .filter(slot -> {
+                    LocalDateTime dateTime = LocalDateTime.of(date, slot);
+
+                    // Não pode ser um horário passado
+                    if (dateTime.isBefore(LocalDateTime.now())) return false;
+
+                    // Não pode ser um horário já agendado
+                    boolean alreadyTaken = taken.stream()
+                            .anyMatch(t -> t.toLocalTime().equals(slot));
+
+                    return !alreadyTaken;
+                })
+                .collect(Collectors.toList());
+
     }
 
 }

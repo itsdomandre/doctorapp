@@ -24,4 +24,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(DateTimeRequestIsNotPermittedException.class)
+    public ResponseEntity<String> handleDateTimeRequestIsNotPermittedException(ResourceNotFoundException ex) {
+        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+    }
 }

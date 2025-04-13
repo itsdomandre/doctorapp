@@ -30,8 +30,8 @@ public class Appointment {
     @JsonIgnore
     private User patient;
 
-    @Column(name = "dateTime")
-    private LocalDateTime createdAt;
+    @Column(name = "appointment_date")
+    private LocalDateTime appointmentDate;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.REQUESTED;
