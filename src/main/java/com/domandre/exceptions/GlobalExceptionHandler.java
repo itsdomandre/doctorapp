@@ -28,4 +28,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDateTimeRequestIsNotPermittedException(ResourceNotFoundException ex) {
         return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
+    @ExceptionHandler(NoAppointmentsException.class)
+    public ResponseEntity<String> handleNoAppointmentsException(NoAppointmentsException ex) {
+        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
+    }
 }
