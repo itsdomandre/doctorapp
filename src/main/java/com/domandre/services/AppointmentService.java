@@ -2,6 +2,7 @@ package com.domandre.services;
 
 import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.request.AppointmentRequest;
+import com.domandre.controllers.request.AppointmentSearchRequest;
 import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
@@ -105,7 +106,6 @@ public class AppointmentService {
         if (rangeOptional.isEmpty()) {
             return List.of();
         }
-
         TimeRange range = rangeOptional.get();
         LocalTime start = range.start();
         LocalTime end = range.end().minusHours(1);
@@ -114,13 +114,11 @@ public class AppointmentService {
         for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)) {
             allPossibleSlots.add(time);
         }
-
         List<LocalDateTime> taken = appointmentRepository
                 .findAllByAppointmentDateBetween(date.atStartOfDay(), date.atTime(23, 59))
                 .stream()
                 .map(Appointment::getAppointmentDate)
                 .toList();
-
         // Filtra os horários disponíveis (que ainda não foram agendados)
         return allPossibleSlots.stream()
                 .filter(slot -> {
@@ -136,7 +134,31 @@ public class AppointmentService {
                     return !alreadyTaken;
                 })
                 .collect(Collectors.toList());
-
     }
+    public List<Appointment> searchAppointments(AppointmentSearchRequest request) {
+        LocalDate from = request.getFromDate() != null ? request.getFromDate() : LocalDate.now().minusMonths(1);
+        LocalDate to = request.getToDate() != null ? request.getToDate() : LocalDate.now().plusMonths(1);
 
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(23, 59);
+
+        List<Appointment> base = appointmentRepository.findAllByAppointmentDateBetween(fromDateTime, toDateTime);
+
+        return base.stream()
+                .filter(appointment -> request.getPatientId() == null || appointment.getPatient().getId().equals(request.getPatientId()))
+                .filter(appointment -> request.getStatus() == null || appointment.getStatus() == request.getStatus())
+                .filter(appointment -> request.getPatientName() == null || appointment.getPatient().getFirstName().toLowerCase().contains(request.getPatientName().toLowerCase()) ||
+                        appointment.getPatient().getLastName().toLowerCase().contains(request.getPatientName().toLowerCase()))
+                .toList();
+    }
+    public List<Appointment> getTodayAppointments() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime from = today.atStartOfDay();
+        LocalDateTime to = today.atTime(23, 59);
+        return appointmentRepository.findAllByAppointmentDateBetween(from, to);
+        // DateBetween must be 2 arguments (from, to) JPA+DB characteristic
+    }
+    public List<Appointment> getPendingAppointments() {
+        return appointmentRepository.findAllRequested();
+    }
 }
