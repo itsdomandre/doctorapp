@@ -10,6 +10,7 @@ import java.util.UUID;
 @Data
 public class AppointmentSearchRequest {
     private UUID patientId;
+    private String patientName;
     private AppointmentStatus status;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fromDate;

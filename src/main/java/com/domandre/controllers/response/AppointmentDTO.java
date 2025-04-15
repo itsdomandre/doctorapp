@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AppointmentDTO {
     private Long id;
-    private LocalDateTime createdAt;
-    private AppointmentStatus status;
-    private String notes;
     private String patientName;
     private Procedures procedure;
+    private LocalDateTime dateTime;
+    private AppointmentStatus status;
     private LocalDateTime updatedAt = LocalDateTime.now();
+    private String notes;
     private String doctorName;
 }

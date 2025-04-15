@@ -1,10 +1,12 @@
 package com.domandre.controllers;
 
 import com.domandre.controllers.request.AppointmentRequest;
+import com.domandre.controllers.request.AppointmentSearchRequest;
 import com.domandre.controllers.request.UpdateAppointmentStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
+import com.domandre.exceptions.NoAppointmentsException;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
@@ -19,6 +21,7 @@ import validators.AppointmentValidator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -80,4 +83,36 @@ public class AppointmentController {
         return ResponseEntity.ok(formatted);
     }
 
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AppointmentDTO>> getSearchAppointments(AppointmentSearchRequest request) {
+        List<Appointment> result = appointmentService.searchAppointments(request);
+        return ResponseEntity.ok(result.stream()
+                .map(AppointmentMapper::toDTO)
+                .toList());
+    }
+
+    @GetMapping("/today")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AppointmentDTO>> getToday() throws NoAppointmentsException {
+        List<Appointment> result = appointmentService.getTodayAppointments();
+
+        List<AppointmentDTO> dtoList = new ArrayList<>();
+        for (Appointment appointment : result) {
+            dtoList.add(AppointmentMapper.toDTO(appointment));
+        }
+        if (result.isEmpty()) {
+            throw new NoAppointmentsException();
+        }
+        return ResponseEntity.ok(dtoList);
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AppointmentDTO>> getPending() {
+        List<Appointment> list = appointmentService.getPendingAppointments();
+        return ResponseEntity.ok(list.stream()
+                .map(AppointmentMapper::toDTO)
+                .toList());
+    }
 }
