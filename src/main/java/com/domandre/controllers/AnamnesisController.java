@@ -24,6 +24,7 @@ public class AnamnesisController {
     private final AppointmentService appointmentService;
     private final AnamnesisService anamnesisService;
 
+    // TODO: Next step: "Separate" responsabilities of Controller/Services: Appointment <> Anamnesis
     @PostMapping("/{appointmentId}")
     public ResponseEntity<AppointmentDTO> fill(@PathVariable Long appointmentId, @RequestBody AnamnesisRequest request) {
         Appointment updated = appointmentService.fillAnamnesis(appointmentId, request);
