@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "anamnesis")
@@ -21,9 +20,6 @@ public class Anamnesis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(mappedBy = "anamnesis")
-    private Appointment appointment;
 
     // 🔍 Histórico médico
     private Boolean hasChronicDisease;
@@ -69,6 +65,6 @@ public class Anamnesis {
     private String foodAllergyDescription;
 
     private LocalDateTime createdAt;
-    // private LocalDateTime updatedAt; »» posteriormente
+    private LocalDateTime updatedAt;
     private String notes;
 }

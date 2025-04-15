@@ -25,6 +25,10 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "anamnesis_id")
+    private Anamnesis anamnesis;
+
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     @JsonIgnore
@@ -43,10 +47,6 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Procedures procedure;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "anamnesis_id")
-    private Anamnesis anamnesis;
 
     private LocalDateTime updatedAt;
     private String notes;

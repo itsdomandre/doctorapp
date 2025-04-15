@@ -6,10 +6,11 @@ import com.domandre.controllers.request.UpdateAppointmentStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
-import com.domandre.exceptions.NoAppointmentsException;
+import com.domandre.exceptions.NoAppointmentsTodayException;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
+import com.domandre.validators.AppointmentValidator;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import validators.AppointmentValidator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,7 +66,7 @@ public class AppointmentController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/update/{id}/status")
+    @PutMapping("/update/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody UpdateAppointmentStatusRequest request) {
         Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
@@ -95,7 +95,7 @@ public class AppointmentController {
 
     @GetMapping("/today")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getToday() throws NoAppointmentsException {
+    public ResponseEntity<List<AppointmentDTO>> getToday() throws NoAppointmentsTodayException {
         List<Appointment> result = appointmentService.getTodayAppointments();
 
         List<AppointmentDTO> dtoList = new ArrayList<>();
@@ -103,7 +103,7 @@ public class AppointmentController {
             dtoList.add(AppointmentMapper.toDTO(appointment));
         }
         if (result.isEmpty()) {
-            throw new NoAppointmentsException();
+            throw new NoAppointmentsTodayException();
         }
         return ResponseEntity.ok(dtoList);
     }

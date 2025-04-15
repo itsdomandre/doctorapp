@@ -1,4 +1,4 @@
-package validators;
+package com.domandre.validators;
 
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;

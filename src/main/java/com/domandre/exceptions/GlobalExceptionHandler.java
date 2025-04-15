@@ -22,14 +22,14 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Resource requested not found", HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(DateTimeRequestIsNotPermittedException.class)
     public ResponseEntity<String> handleDateTimeRequestIsNotPermittedException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>("Requested Date/Time is not in the range", HttpStatus.NOT_ACCEPTABLE);
     }
-    @ExceptionHandler(NoAppointmentsException.class)
-    public ResponseEntity<String> handleNoAppointmentsException(NoAppointmentsException ex) {
-        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
+    @ExceptionHandler(NoAppointmentsTodayException.class)
+    public ResponseEntity<String> handleNoAppointmentsException(NoAppointmentsTodayException ex) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
