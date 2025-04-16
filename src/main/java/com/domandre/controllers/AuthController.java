@@ -10,6 +10,7 @@ import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Slf4j
 
 public class AuthController {
     private final AuthService authService;
@@ -31,13 +33,18 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDTO> register(@RequestBody RegisterRequest request) throws UserAlreadyExistsException {
+        log.info("Registration attempt for new user: {}", request.getEmail());
         User user = authService.register(request);
+        log.info("Registration completed for user: {}", request.getEmail());
         return ResponseEntity.ok(UserMapper.toDTO(user));
+
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
+        log.info("Login successful for user: {}", loginRequest.getEmail());
         return ResponseEntity.ok("User: " + loginRequest.getEmail() + " logged succesfully! \n\nToken: " + token);
     }
 
@@ -47,6 +54,7 @@ public class AuthController {
             token = token.substring(7);
         }
         jwtTokenProvider.invalidateToken(token);
+        log.info("Logout successfully");
         return ResponseEntity.ok("Logout successfully");
     }
 

@@ -14,6 +14,7 @@ import com.domandre.validators.AppointmentValidator;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,18 +30,23 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/appointment")
 @SecurityRequirement(name = "bearerAuth")
+@Slf4j
+
 public class AppointmentController {
     private final AppointmentService appointmentService;
     private final UserService userService;
 
     @PostMapping("/create")
+    // TODO: - Appointment: Anamnesis - Atrelar ao usuário (PacientID)
+    // TODO: - Ao criar Anamnesis -> Retornará o ID da última Anamnesis no momento de preencher
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) {
+        log.info("Creating appointment for date: {}", request.getDateTime());
         LocalDateTime requestTimeToAppointment = request.getDateTime();
         if (!AppointmentValidator.isValidAppointment(requestTimeToAppointment)) {
             throw new IllegalArgumentException("Date/hour invalid. Check the available schedule");
         }
-
         Appointment appointment = appointmentService.createAppointment(request);
+        log.info("Appointment created successfully for date: {}", request.getDateTime());
         return ResponseEntity.ok(AppointmentMapper.toDTO(appointment));
     }
 
@@ -48,7 +54,7 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentDTO>> getMyAppointments() {
         User currentUser = UserService.getCurrentUser();
         List<Appointment> appointments = appointmentService.getAppointmentsForCurrentUser(currentUser);
-
+        log.info("Found {} appointments for user: {}", appointments.size(), currentUser.getEmail());
         List<AppointmentDTO> dto = appointments.stream()
                 .map(AppointmentMapper::toDTO)
                 .toList();
@@ -58,8 +64,8 @@ public class AppointmentController {
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDTO>> getAll() {
+        log.info("Fetching all appointments (ADMIN access)");
         List<Appointment> appointments = appointmentService.getAllAppointments();
-
         List<AppointmentDTO> dto = appointments.stream()
                 .map(AppointmentMapper::toDTO)
                 .toList();
@@ -69,25 +75,30 @@ public class AppointmentController {
     @PutMapping("/update/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody UpdateAppointmentStatusRequest request) {
+        log.info("Updating appointment status: ID={} | Status={} | Doctor={}", id, request.getStatus(), request.getDoctorId());
         Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
+        log.info("Appointment status updated successfully. ID={}", updated.getId());
         return ResponseEntity.ok(AppointmentMapper.toDTO(updated));
     }
 
     @GetMapping("/slots")
     public ResponseEntity<List<String>> getAvailableSlots(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        log.info("Fetching available slots for date: {}", date);
         List<LocalTime> slots = appointmentService.getAvailableSlots(date);
 
         List<String> formatted = slots.stream()
                 .map(LocalTime::toString)
                 .toList();
-
+        log.info("{} available slots found for {}", formatted.size(), date);
         return ResponseEntity.ok(formatted);
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDTO>> getSearchAppointments(AppointmentSearchRequest request) {
+        log.info("Searching appointments with filters: {}", request);
         List<Appointment> result = appointmentService.searchAppointments(request);
+        log.info("{} appointments matched search criteria", result.size());
         return ResponseEntity.ok(result.stream()
                 .map(AppointmentMapper::toDTO)
                 .toList());
@@ -96,6 +107,7 @@ public class AppointmentController {
     @GetMapping("/today")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDTO>> getToday() throws NoAppointmentsTodayException {
+        log.info("Fetching today's appointments");
         List<Appointment> result = appointmentService.getTodayAppointments();
 
         List<AppointmentDTO> dtoList = new ArrayList<>();
@@ -103,15 +115,19 @@ public class AppointmentController {
             dtoList.add(AppointmentMapper.toDTO(appointment));
         }
         if (result.isEmpty()) {
+            log.warn("No appointments found for today");
             throw new NoAppointmentsTodayException();
         }
+        log.info("{} appointments found for today", dtoList.size());
         return ResponseEntity.ok(dtoList);
     }
 
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDTO>> getPending() {
+        log.info("Fetching pending appointments");
         List<Appointment> list = appointmentService.getPendingAppointments();
+        log.info("{} pending appointments found", list.size());
         return ResponseEntity.ok(list.stream()
                 .map(AppointmentMapper::toDTO)
                 .toList());
