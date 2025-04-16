@@ -21,6 +21,12 @@ public class Anamnesis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "patient_id")
+    private User patient;
+    @OneToOne(mappedBy = "anamnesis")
+    private Appointment appointment;
+
     // 🔍 Histórico médico
     private Boolean hasChronicDisease;
     private String chronicDiseaseDescription;

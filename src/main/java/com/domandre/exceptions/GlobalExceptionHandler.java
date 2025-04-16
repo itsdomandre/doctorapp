@@ -32,4 +32,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoAppointmentsException(NoAppointmentsTodayException ex) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }

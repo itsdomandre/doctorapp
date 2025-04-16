@@ -12,8 +12,10 @@ import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;
 import com.domandre.mappers.AnamnesisMapper;
+import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final AnamnesisRepository anamnesisRepository;
 
     public Appointment createAppointment(AppointmentRequest request) {
         User patient = UserService.getCurrentUser();
@@ -160,5 +163,20 @@ public class AppointmentService {
     }
     public List<Appointment> getPendingAppointments() {
         return appointmentRepository.findAllRequested();
+    }
+
+    public Anamnesis createAnamnesis(UUID patientId, AnamnesisRequest request) throws ResourceNotFoundException {
+        User patient = userService.getUserById(patientId);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime window = now.minusSeconds(1);
+
+        boolean recentlyCreated = anamnesisRepository.existsByPatientAndCreatedAtAfter(patient, window);
+        if (recentlyCreated) {
+            throw new IllegalArgumentException("Patient already has a recently created anamnesis.");
+        }
+        Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
+        anamnesis.setPatient(patient);
+        anamnesis.setUpdatedAt(LocalDateTime.now());
+        return anamnesisRepository.save(anamnesis);
     }
 }

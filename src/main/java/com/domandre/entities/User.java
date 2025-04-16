@@ -43,8 +43,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Appointment> patientAppointments;
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Anamnesis> anamneses = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
