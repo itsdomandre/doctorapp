@@ -1,59 +1,78 @@
 package services;
 
 import com.domandre.entities.Appointment;
+import com.domandre.helpers.BusinessHoursHelper;
+import com.domandre.helpers.BusinessHoursHelper.TimeRange;
+import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AppointmentServiceTest {
-    private AppointmentRepository appointmentRepository;
-    private UserService userService;
-    private UserRepository userRepository;
+
     private AppointmentService appointmentService;
+    private AppointmentRepository appointmentRepository;
+    private UserRepository userRepository;
+    private UserService userService;
+    private AnamnesisRepository anamnesisRepository;
 
     @BeforeEach
     void setUp() {
         appointmentRepository = mock(AppointmentRepository.class);
+        userRepository = mock(UserRepository.class);
         userService = mock(UserService.class);
-        appointmentService = new AppointmentService(appointmentRepository,userService,userRepository);
+        anamnesisRepository = mock(AnamnesisRepository.class);
+
+        appointmentService = new AppointmentService(
+                appointmentRepository,
+                userService,
+                userRepository,
+                anamnesisRepository
+        );
     }
+
     @Test
     void testGetAvailableSlots_whenOneSlotTaken_shouldExcludeIt() {
-        // Dia de teste: terça-feira (tem expediente das 08h às 20h)
-        LocalDate date = LocalDate.of(2025, 4, 15); // terça-feira
+        LocalDate nextValidBusinessDay = getNextValidBusinessDay(DayOfWeek.WEDNESDAY);
+        TimeRange range = BusinessHoursHelper.getBusinessHours(DayOfWeek.WEDNESDAY).orElseThrow();
+        LocalTime takenTime = LocalTime.of(10, 0);
+        LocalDateTime takenDateTime = LocalDateTime.of(nextValidBusinessDay, takenTime);
+        Appointment takenAppointment = Appointment.builder().appointmentDate(takenDateTime).build();
 
-        // Simular um horário já ocupado: 10:00
-        LocalDateTime takenDateTime = LocalDateTime.of(date, LocalTime.of(10, 0));
-        Appointment taken = Appointment.builder().appointmentDate(takenDateTime).build();
-
-        // Configurar mock: retorna uma lista com esse appointment
         when(appointmentRepository.findAllByAppointmentDateBetween(
-                date.atStartOfDay(), date.atTime(23, 59)))
-                .thenReturn(List.of(taken));
+                nextValidBusinessDay.atStartOfDay(),
+                nextValidBusinessDay.atTime(23, 59)
+        )).thenReturn(List.of(takenAppointment));
 
-        // 🔹 Executar o método que estamos testando
-        List<LocalTime> availableSlots = appointmentService.getAvailableSlots(date);
+        List<LocalTime> availableSlots = appointmentService.getAvailableSlots(nextValidBusinessDay);
+        System.out.println("Available slots: " + availableSlots);
 
-        // 🔹 Verificar: o horário 10:00 não deve estar na lista
-        assertFalse(availableSlots.contains(LocalTime.of(10, 0)));
+        assertFalse(availableSlots.contains(takenTime), "10:00 should NOT be available");
 
-        // 🔹 E outros horários dentro da faixa devem estar
-        assertTrue(availableSlots.contains(LocalTime.of(9, 0)));
-        assertTrue(availableSlots.contains(LocalTime.of(11, 0)));
+        LocalTime before = takenTime.minusHours(1); // 09:00
+        LocalTime after = takenTime.plusHours(1);   // 11:00
+
+        assertTrue(availableSlots.contains(before), before + " should be available");
+        assertTrue(availableSlots.contains(after), after + " should be available");
     }
 
-    private void assertFalse(boolean contains) {
+    private LocalDate getNextValidBusinessDay(DayOfWeek dayOfWeek) {
+        LocalDate date = LocalDate.now().plusDays(1);
+        while (date.getDayOfWeek() != dayOfWeek) {
+            date = date.plusDays(1);
+        }
+        return date;
     }
 }
