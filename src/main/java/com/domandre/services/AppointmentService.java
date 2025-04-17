@@ -88,22 +88,6 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    public Appointment fillAnamnesis(Long appointmentId, AnamnesisRequest request) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        if (appointment.getAnamnesis() != null) {
-            throw new RuntimeException("Anamnesis was filled");
-        }
-        if (appointment.getStatus() != AppointmentStatus.APPROVED) {
-            throw new RuntimeException("Appointment is not Approved. Contact the Administrator.");
-        }
-
-        Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
-        appointment.setAnamnesis(anamnesis);
-
-        return appointmentRepository.save(appointment);
-    }
-
     public List<LocalTime> getAvailableSlots(LocalDate date) {
         Optional<TimeRange> rangeOptional = BusinessHoursHelper.getBusinessHours(date.getDayOfWeek());
         if (rangeOptional.isEmpty()) {
@@ -138,6 +122,7 @@ public class AppointmentService {
                 })
                 .collect(Collectors.toList());
     }
+
     public List<Appointment> searchAppointments(AppointmentSearchRequest request) {
         LocalDate from = request.getFromDate() != null ? request.getFromDate() : LocalDate.now().minusMonths(1);
         LocalDate to = request.getToDate() != null ? request.getToDate() : LocalDate.now().plusMonths(1);
@@ -154,6 +139,7 @@ public class AppointmentService {
                         appointment.getPatient().getLastName().toLowerCase().contains(request.getPatientName().toLowerCase()))
                 .toList();
     }
+
     public List<Appointment> getTodayAppointments() {
         LocalDate today = LocalDate.now();
         LocalDateTime from = today.atStartOfDay();
@@ -161,22 +147,9 @@ public class AppointmentService {
         return appointmentRepository.findAllByAppointmentDateBetween(from, to);
         // DateBetween must be 2 arguments (from, to) JPA+DB characteristic
     }
+
     public List<Appointment> getPendingAppointments() {
         return appointmentRepository.findAllRequested();
     }
 
-    public Anamnesis createAnamnesis(UUID patientId, AnamnesisRequest request) throws ResourceNotFoundException {
-        User patient = userService.getUserById(patientId);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime window = now.minusSeconds(1);
-
-        boolean recentlyCreated = anamnesisRepository.existsByPatientAndCreatedAtAfter(patient, window);
-        if (recentlyCreated) {
-            throw new IllegalArgumentException("Patient already has a recently created anamnesis.");
-        }
-        Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
-        anamnesis.setPatient(patient);
-        anamnesis.setUpdatedAt(LocalDateTime.now());
-        return anamnesisRepository.save(anamnesis);
-    }
 }

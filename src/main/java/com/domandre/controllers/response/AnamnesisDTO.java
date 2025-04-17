@@ -39,7 +39,7 @@ public class AnamnesisDTO {
     private String contraceptiveDescription;
     private Boolean hasFoodAllergy;
     private String foodAllergyDescription;
-    // private LocalDateTime updatedAt; »» posteriormente
+    private LocalDateTime updatedAt;
     private String notes;
 }
 

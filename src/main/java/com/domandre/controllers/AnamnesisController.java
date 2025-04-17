@@ -45,7 +45,7 @@ public class AnamnesisController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> createAnamnesis (@PathVariable UUID patientId, @Valid @RequestBody AnamnesisRequest request) throws ResourceNotFoundException {
         log.info("Creating new anamnesis for patient ID: {}", patientId);
-        Anamnesis created = appointmentService.createAnamnesis(patientId, request);
+        Anamnesis created = anamnesisService.createAnamnesis(patientId, request);
         log.info("Anamnesis created with ID: {}", created.getId());
         return ResponseEntity.ok(AnamnesisMapper.toDTO(created));
     }
