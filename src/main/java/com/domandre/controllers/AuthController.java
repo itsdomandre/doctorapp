@@ -26,7 +26,7 @@ public class AuthController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated")
-    public ResponseEntity<UserDTO> getLoggedUser(){
+    public ResponseEntity<UserDTO> getLoggedUser() {
         User user = UserService.getCurrentUser();
         return ResponseEntity.ok(UserMapper.toDTO(user));
     }

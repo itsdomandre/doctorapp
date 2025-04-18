@@ -2,13 +2,9 @@ package com.domandre.controllers;
 
 import com.domandre.DTOs.AnamnesisDTO;
 import com.domandre.controllers.request.AnamnesisRequest;
-import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Anamnesis;
-import com.domandre.entities.Appointment;
-import com.domandre.exceptions.NoAppointmentsTodayException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.mappers.AnamnesisMapper;
-import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AnamnesisService;
 import com.domandre.services.AppointmentService;
 import jakarta.validation.Valid;
@@ -33,7 +29,7 @@ public class AnamnesisController {
 
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AnamnesisDTO>> getByPatient (@PathVariable UUID patientId){
+    public ResponseEntity<List<AnamnesisDTO>> getByPatient(@PathVariable UUID patientId) {
         List<Anamnesis> anamneses = anamnesisService.getAnamnesesByPatient(patientId);
         List<AnamnesisDTO> dtoList = anamneses.stream()
                 .map(AnamnesisMapper::toDTO)
@@ -43,7 +39,7 @@ public class AnamnesisController {
 
     @PostMapping("/patient/{patientId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AnamnesisDTO> createAnamnesis (@PathVariable UUID patientId, @Valid @RequestBody AnamnesisRequest request) throws ResourceNotFoundException {
+    public ResponseEntity<AnamnesisDTO> createAnamnesis(@PathVariable UUID patientId, @Valid @RequestBody AnamnesisRequest request) throws ResourceNotFoundException {
         log.info("Creating new anamnesis for patient ID: {}", patientId);
         Anamnesis created = anamnesisService.createAnamnesis(patientId, request);
         log.info("Anamnesis created with ID: {}", created.getId());
@@ -52,7 +48,7 @@ public class AnamnesisController {
 
     @PatchMapping("/appointment/{appointmentId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AnamnesisDTO> updateByAppointment(@PathVariable Long appointmentId, @RequestBody @Valid AnamnesisRequest request
+    public ResponseEntity<AnamnesisDTO> updateAnamnesisByAppointment(@PathVariable Long appointmentId, @RequestBody @Valid AnamnesisRequest request
     ) throws ResourceNotFoundException {
         log.info("Updating anamnesis for appointment ID: {}", appointmentId);
         Anamnesis updated = anamnesisService.updateByAppointmentId(appointmentId, request);

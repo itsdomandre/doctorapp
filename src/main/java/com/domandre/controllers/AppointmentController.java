@@ -63,7 +63,7 @@ public class AppointmentController {
 
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getAll() {
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointments() {
         log.info("Fetching all appointments (ADMIN access)");
         List<Appointment> appointments = appointmentService.getAllAppointments();
         List<AppointmentDTO> dto = appointments.stream()
@@ -106,7 +106,7 @@ public class AppointmentController {
 
     @GetMapping("/today")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getToday() throws NoAppointmentsTodayException {
+    public ResponseEntity<List<AppointmentDTO>> getTodayAppointments() throws NoAppointmentsTodayException {
         log.info("Fetching today's appointments");
         List<Appointment> result = appointmentService.getTodayAppointments();
 
@@ -124,7 +124,7 @@ public class AppointmentController {
 
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getPending() {
+    public ResponseEntity<List<AppointmentDTO>> getPendingAppointments() {
         log.info("Fetching pending appointments");
         List<Appointment> list = appointmentService.getPendingAppointments();
         log.info("{} pending appointments found", list.size());

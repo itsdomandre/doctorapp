@@ -11,9 +11,7 @@ public class AppointmentValidator {
     public static boolean isValidAppointment(LocalDateTime dateTime) {
         DayOfWeek day = dateTime.getDayOfWeek();
         LocalTime time = dateTime.toLocalTime();
-
         Optional<TimeRange> rangeOptional = BusinessHoursHelper.getBusinessHours(day);
-
         if (rangeOptional.isEmpty()) {
             return false;
         }
