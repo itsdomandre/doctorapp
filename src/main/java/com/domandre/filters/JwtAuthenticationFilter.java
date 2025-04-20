@@ -1,6 +1,6 @@
 package com.domandre.filters;
 
-import com.domandre.config.JwtTokenProvider;
+import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor // Lombok vai gerar o construtor para os campos finais
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider tokenProvider;
+    private final JwtService tokenProvider;
     private final UserService userDetailsService;
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);

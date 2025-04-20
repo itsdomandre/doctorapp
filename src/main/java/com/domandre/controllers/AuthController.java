@@ -1,6 +1,5 @@
 package com.domandre.controllers;
 
-import com.domandre.config.JwtTokenProvider;
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.controllers.response.UserDTO;
@@ -8,6 +7,7 @@ import com.domandre.entities.User;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
+import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 public class AuthController {
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtService jwtService;
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated")
@@ -53,7 +53,7 @@ public class AuthController {
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
-        jwtTokenProvider.invalidateToken(token);
+        jwtService.invalidateToken(token);
         log.info("Logout successfully");
         return ResponseEntity.ok("Logout successfully");
     }

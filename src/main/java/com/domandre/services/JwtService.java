@@ -1,4 +1,4 @@
-package com.domandre.config;
+package com.domandre.services;
 
 import com.domandre.entities.InvalidToken;
 import com.domandre.repositories.InvalidTokenRepository;
@@ -15,7 +15,7 @@ import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class JwtService {
 
     private final InvalidTokenRepository invalidTokenRepository;
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);

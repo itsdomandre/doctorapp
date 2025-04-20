@@ -1,6 +1,5 @@
 package com.domandre.services;
 
-import com.domandre.config.JwtTokenProvider;
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.User;
@@ -22,7 +21,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider tokenProvider;
+    private final JwtService tokenProvider;
     private final InvalidTokenRepository invalidTokenRepository;
 
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
@@ -56,5 +55,4 @@ public class AuthService {
     }
 
 }
-//TODO: Implementar register, login, logout.
 
