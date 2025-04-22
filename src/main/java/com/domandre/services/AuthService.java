@@ -23,6 +23,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService tokenProvider;
     private final InvalidTokenRepository invalidTokenRepository;
+    private final MailService mailService;
 
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -37,8 +38,10 @@ public class AuthService {
         user.setBirhdate(request.getBirthdate());
         Role role = request.getRole() != null ? request.getRole() : Role.USER;
         user.setRole(role);
+        User requestedNewUser = userRepository.save(user);
 
-        return userRepository.save(user);
+        mailService.sendWelcomeEmail(requestedNewUser.getEmail(), requestedNewUser.getFirstName());
+        return requestedNewUser;
     }
 
     public String login(LoginRequest loginRequest) throws BadCredentialsException {
