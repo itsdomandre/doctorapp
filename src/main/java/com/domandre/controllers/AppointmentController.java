@@ -6,6 +6,7 @@ import com.domandre.controllers.request.UpdateAppointmentStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
+import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
 import com.domandre.exceptions.NoAppointmentsTodayException;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +41,7 @@ public class AppointmentController {
     @PostMapping("/create")
     // TODO: - Appointment: Anamnesis - Atrelar ao usuário (PacientID)
     // TODO: - Ao criar Anamnesis -> Retornará o ID da última Anamnesis no momento de preencher
-    public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) {
+    public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {
         log.info("Creating appointment for date: {}", request.getDateTime());
         LocalDateTime requestTimeToAppointment = request.getDateTime();
         if (!AppointmentValidator.isValidAppointment(requestTimeToAppointment)) {

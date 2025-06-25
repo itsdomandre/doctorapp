@@ -26,7 +26,7 @@ public class RegisterRequest {
     private String password;
     @NotBlank(message = "The field phoneNumber is missing")
     private String phoneNumber;
-
+    @NotBlank(message = "The field Birthdate is missing")
     @DateTimeFormat(pattern = "yyyyMMdd")
     private LocalDate birthdate;
     private Role role;
