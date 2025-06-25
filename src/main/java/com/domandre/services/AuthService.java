@@ -24,7 +24,7 @@ public class AuthService {
     private final JwtService tokenProvider;
     private final InvalidTokenRepository invalidTokenRepository;
     private final MailService mailService;
-
+//TODO: Necessário verificar/testar
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException();
@@ -40,7 +40,7 @@ public class AuthService {
         user.setRole(role);
         User requestedNewUser = userRepository.save(user);
 
-        mailService.sendWelcomeEmail(requestedNewUser.getEmail(), requestedNewUser.getFirstName());
+        //mailService.sendWelcomeEmail(requestedNewUser.getEmail(), requestedNewUser.getFirstName());
         return requestedNewUser;
     }
 

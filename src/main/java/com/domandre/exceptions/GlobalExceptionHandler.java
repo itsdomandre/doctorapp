@@ -41,9 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleJsonParseError(HttpMessageNotReadableException ex) {
-        String message = "Bad Request. Verify the mandatory fields";
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        return new ResponseEntity<>("Bad Request. Verify the mandatory fields", HttpStatus.BAD_REQUEST);
     }
-
 
 }

@@ -45,7 +45,7 @@ public class AppointmentController {
         log.info("Creating appointment for date: {}", request.getDateTime());
         LocalDateTime requestTimeToAppointment = request.getDateTime();
         if (!AppointmentValidator.isValidAppointment(requestTimeToAppointment)) {
-            throw new IllegalArgumentException("Date/hour invalid. Check the available schedule");
+            throw new DateTimeRequestIsNotPermittedException();
         }
         Appointment appointment = appointmentService.createAppointment(request);
         log.info("Appointment created successfully for date: {}", request.getDateTime());

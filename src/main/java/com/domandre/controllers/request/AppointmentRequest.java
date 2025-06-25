@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class AppointmentRequest {
-    @NotNull(message = "Date/hour is mandatory")
+    @NotNull(message = "Date/hour is Mandatory")
     private LocalDateTime dateTime;
+    @NotNull(message = "Procedure is Mandatory")
     private Procedures procedure;
     private String notes;
 }

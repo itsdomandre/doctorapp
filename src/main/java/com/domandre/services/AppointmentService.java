@@ -1,21 +1,18 @@
 package com.domandre.services;
 
-import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.controllers.request.AppointmentSearchRequest;
-import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
+import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;
-import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,16 +33,13 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final AnamnesisRepository anamnesisRepository;
 
-    public Appointment createAppointment(AppointmentRequest request) {
+    public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
         User patient = UserService.getCurrentUser();
-        Appointment appointment = Appointment.builder()
-                .patient(patient)
-                .appointmentDate(request.getDateTime())
-                .patient(patient)
-                .procedure(request.getProcedure())
-                .notes(request.getNotes())
-                .status(AppointmentStatus.REQUESTED)
-                .build();
+        boolean existsAppointment = appointmentRepository.existsByAppointmentDate(request.getDateTime());
+        if (existsAppointment == true) {
+            throw new DateTimeRequestIsNotPermittedException();
+        }
+        Appointment appointment = Appointment.builder().patient(patient).appointmentDate(request.getDateTime()).procedure(request.getProcedure()).notes(request.getNotes()).status(AppointmentStatus.REQUESTED).build();
         return appointmentRepository.save(appointment);
     }
 
@@ -62,8 +56,7 @@ public class AppointmentService {
     }
 
     public Appointment getOrThrow(Long id) throws ResourceNotFoundException {
-        return appointmentRepository.findById(id)
-                .orElseThrow(ResourceNotFoundException::new);
+        return appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
     public List<Appointment> getAppointmentsForCurrentUser(User currentUser) {
@@ -71,8 +64,7 @@ public class AppointmentService {
     }
 
     public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         appointment.setStatus(newStatus);
         if (newStatus == AppointmentStatus.APPROVED) {
@@ -84,6 +76,7 @@ public class AppointmentService {
                 throw new RuntimeException("Selected user is not doctor");
             }
             appointment.setDoctor(doctor);
+            appointment.setUpdatedAt(LocalDateTime.now());
         }
         return appointmentRepository.save(appointment);
     }
@@ -101,26 +94,19 @@ public class AppointmentService {
         for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)) {
             allPossibleSlots.add(time);
         }
-        List<LocalDateTime> taken = appointmentRepository
-                .findAllByAppointmentDateBetween(date.atStartOfDay(), date.atTime(23, 59))
-                .stream()
-                .map(Appointment::getAppointmentDate)
-                .toList();
+        List<LocalDateTime> taken = appointmentRepository.findAllByAppointmentDateBetween(date.atStartOfDay(), date.atTime(23, 59)).stream().map(Appointment::getAppointmentDate).toList();
         // Filtra os horários disponíveis (que ainda não foram agendados)
-        return allPossibleSlots.stream()
-                .filter(slot -> {
-                    LocalDateTime dateTime = LocalDateTime.of(date, slot);
+        return allPossibleSlots.stream().filter(slot -> {
+            LocalDateTime dateTime = LocalDateTime.of(date, slot);
 
-                    // Não pode ser um horário passado
-                    if (dateTime.isBefore(LocalDateTime.now())) return false;
+            // Não pode ser um horário passado
+            if (dateTime.isBefore(LocalDateTime.now())) return false;
 
-                    // Não pode ser um horário já agendado
-                    boolean alreadyTaken = taken.stream()
-                            .anyMatch(t -> t.toLocalTime().equals(slot));
+            // Não pode ser um horário já agendado
+            boolean alreadyTaken = taken.stream().anyMatch(t -> t.toLocalTime().equals(slot));
 
-                    return !alreadyTaken;
-                })
-                .collect(Collectors.toList());
+            return !alreadyTaken;
+        }).collect(Collectors.toList());
     }
 
     public List<Appointment> searchAppointments(AppointmentSearchRequest request) {
@@ -132,12 +118,7 @@ public class AppointmentService {
 
         List<Appointment> base = appointmentRepository.findAllByAppointmentDateBetween(fromDateTime, toDateTime);
 
-        return base.stream()
-                .filter(appointment -> request.getPatientId() == null || appointment.getPatient().getId().equals(request.getPatientId()))
-                .filter(appointment -> request.getStatus() == null || appointment.getStatus() == request.getStatus())
-                .filter(appointment -> request.getPatientName() == null || appointment.getPatient().getFirstName().toLowerCase().contains(request.getPatientName().toLowerCase()) ||
-                        appointment.getPatient().getLastName().toLowerCase().contains(request.getPatientName().toLowerCase()))
-                .toList();
+        return base.stream().filter(appointment -> request.getPatientId() == null || appointment.getPatient().getId().equals(request.getPatientId())).filter(appointment -> request.getStatus() == null || appointment.getStatus() == request.getStatus()).filter(appointment -> request.getPatientName() == null || appointment.getPatient().getFirstName().toLowerCase().contains(request.getPatientName().toLowerCase()) || appointment.getPatient().getLastName().toLowerCase().contains(request.getPatientName().toLowerCase())).toList();
     }
 
     public List<Appointment> getTodayAppointments() {
@@ -151,5 +132,4 @@ public class AppointmentService {
     public List<Appointment> getPendingAppointments() {
         return appointmentRepository.findAllRequested();
     }
-
 }
