@@ -43,10 +43,11 @@ public class AnamnesisService {
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
             throw new AppointmentNotAprovedException();
         }
-        boolean recentlyCreated = repository.existsByPatientAndCreatedAtAfter(patient, window);
-        if (recentlyCreated) {
+
+        if (appointment.getAnamnesis() != null){
             throw new AnamnesisAlreadyExistsException();
         }
+
         Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
         anamnesis.setPatient(patient);
         anamnesis.setAppointment(appointment);
