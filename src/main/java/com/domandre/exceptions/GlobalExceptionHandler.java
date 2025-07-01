@@ -44,4 +44,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Bad Request. Verify the mandatory fields", HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AppointmentNotAprovedException.class)
+    public ResponseEntity<String> handleAppointmentNotApprovedException(AppointmentNotAprovedException ex) {
+        return new ResponseEntity<>("Anamnesis can only created for approved appointment", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AnamnesisAlreadyExistsException.class)
+    public ResponseEntity<String> handleAnamnesisAlreadyExistsException(AnamnesisAlreadyExistsException ex) {
+        return new ResponseEntity<>("Patient already has an anamnesis record.", HttpStatus.CONFLICT);
+    }
 }

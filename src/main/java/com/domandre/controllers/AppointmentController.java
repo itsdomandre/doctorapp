@@ -47,6 +47,7 @@ public class AppointmentController {
         if (!AppointmentValidator.isValidAppointment(requestTimeToAppointment)) {
             throw new DateTimeRequestIsNotPermittedException();
         }
+
         Appointment appointment = appointmentService.createAppointment(request);
         log.info("Appointment created successfully for date: {}", request.getDateTime());
         return ResponseEntity.ok(AppointmentMapper.toDTO(appointment));
@@ -117,10 +118,10 @@ public class AppointmentController {
             dtoList.add(AppointmentMapper.toDTO(appointment));
         }
         if (result.isEmpty()) {
-            log.warn("No appointments found for today");
+            log.warn("No appointments found today");
             throw new NoAppointmentsTodayException();
         }
-        log.info("{} appointments found for today", dtoList.size());
+        log.info("{} appointments found today", dtoList.size());
         return ResponseEntity.ok(dtoList);
     }
 

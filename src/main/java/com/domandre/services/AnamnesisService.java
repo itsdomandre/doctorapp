@@ -4,9 +4,13 @@ import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
+import com.domandre.enums.AppointmentStatus;
+import com.domandre.exceptions.AnamnesisAlreadyExistsException;
+import com.domandre.exceptions.AppointmentNotAprovedException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AnamnesisRepository;
+import com.domandre.repositories.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +24,41 @@ public class AnamnesisService {
     private final AnamnesisRepository repository;
     private final AppointmentService appointmentService;
     private final UserService userService;
+    private final AppointmentRepository appointmentRepository;
 
     public List<Anamnesis> getAnamnesesByPatient(UUID patientId) {
         return repository.findAllByPatientId(patientId);
     }
-    public Anamnesis createAnamnesis(UUID patientId, AnamnesisRequest request) throws ResourceNotFoundException {
+
+    public Anamnesis getLastByPatient(UUID patientId) {
+        return repository.findTopByPatientIdOrderByCreatedAtDesc(patientId);
+    }
+
+    public Anamnesis createAnamnesis(UUID patientId, Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
         User patient = userService.getUserById(patientId);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime window = now.minusSeconds(1);
 
+        Appointment appointment = appointmentService.getOrThrow(appointmentId);
+        if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
+            throw new AppointmentNotAprovedException();
+        }
         boolean recentlyCreated = repository.existsByPatientAndCreatedAtAfter(patient, window);
         if (recentlyCreated) {
-            throw new IllegalArgumentException("Patient already has a recently created anamnesis.");
+            throw new AnamnesisAlreadyExistsException();
         }
         Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
         anamnesis.setPatient(patient);
-        anamnesis.setUpdatedAt(LocalDateTime.now());
-        return repository.save(anamnesis);
+        anamnesis.setAppointment(appointment);
+        anamnesis.setCreatedAt(LocalDateTime.now());
+
+        Anamnesis createdAnamnesis = repository.save(anamnesis);
+        appointment.setAnamnesis(createdAnamnesis);
+        appointmentRepository.save(appointment);
+
+        return createdAnamnesis;
     }
+
     public Anamnesis updateByAppointmentId(Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException {
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         Anamnesis anamnesis = appointment.getAnamnesis();
