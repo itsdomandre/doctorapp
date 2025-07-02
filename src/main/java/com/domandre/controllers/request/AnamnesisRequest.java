@@ -39,6 +39,7 @@ public class AnamnesisRequest {
     private String contraceptiveDescription;
     private Boolean hasFoodAllergy;
     private String foodAllergyDescription;
+    private LocalDateTime createdAt;
     private LocalDateTime updateAt;
     private String notes;
 }

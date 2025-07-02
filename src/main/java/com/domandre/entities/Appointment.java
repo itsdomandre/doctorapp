@@ -47,7 +47,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Procedures procedure;
-
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String notes;
 }

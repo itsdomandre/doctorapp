@@ -1,6 +1,6 @@
 package com.domandre.mappers;
 
-import com.domandre.DTOs.AnamnesisDTO;
+import com.domandre.controllers.response.AnamnesisDTO;
 import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.entities.Anamnesis;
 

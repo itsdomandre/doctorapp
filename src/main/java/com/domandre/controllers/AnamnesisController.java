@@ -1,7 +1,7 @@
 package com.domandre.controllers;
 
-import com.domandre.DTOs.AnamnesisDTO;
 import com.domandre.controllers.request.AnamnesisRequest;
+import com.domandre.controllers.response.AnamnesisDTO;
 import com.domandre.entities.Anamnesis;
 import com.domandre.exceptions.AnamnesisAlreadyExistsException;
 import com.domandre.exceptions.AppointmentNotAprovedException;
@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,5 +68,21 @@ public class AnamnesisController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(AnamnesisMapper.toDTO(lastAnamnesis));
+    }
+
+    @GetMapping("/patient/{patientId}/history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AnamnesisDTO>> getAnamnesisHistory(@PathVariable UUID patientId, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
+        List<Anamnesis> anamneses = anamnesisService.getAnamnesesByPatient(patientId);
+        List<AnamnesisDTO> dtos = new ArrayList<>();
+
+        for (Anamnesis a : anamneses) {
+            if (a.getCreatedAt() == null) continue;
+            LocalDate createdDate = a.getCreatedAt().toLocalDate();
+            if (startDate != null && createdDate.isBefore(startDate)) continue;
+            if (endDate != null && createdDate.isAfter(startDate)) continue;
+            dtos.add(AnamnesisMapper.toDTO(a));
+        }
+        return ResponseEntity.ok(dtos);
     }
 }

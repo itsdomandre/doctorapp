@@ -130,7 +130,7 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentDTO>> getPendingAppointments() {
         log.info("Fetching pending appointments");
         List<Appointment> list = appointmentService.getPendingAppointments();
-        log.info("{} pending appointments found", list.size());
+        log.info("{} Pending appointments found", list.size());
         return ResponseEntity.ok(list.stream()
                 .map(AppointmentMapper::toDTO)
                 .toList());

@@ -39,7 +39,13 @@ public class AppointmentService {
         if (existsAppointment == true) {
             throw new DateTimeRequestIsNotPermittedException();
         }
-        Appointment appointment = Appointment.builder().patient(patient).appointmentDate(request.getDateTime()).procedure(request.getProcedure()).notes(request.getNotes()).status(AppointmentStatus.REQUESTED).build();
+        Appointment appointment = Appointment.builder().
+                patient(patient)
+                .appointmentDate(request.getDateTime())
+                .procedure(request.getProcedure())
+                .notes(request.getNotes()).status(AppointmentStatus.REQUESTED)
+                .createdAt(LocalDateTime.now())
+                .build();
         return appointmentRepository.save(appointment);
     }
 

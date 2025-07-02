@@ -12,6 +12,7 @@ import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AnamnesisService {
     private final AnamnesisRepository repository;
@@ -41,10 +43,11 @@ public class AnamnesisService {
 
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
+            log.info("Anamnesis can only created for approved appointment");
             throw new AppointmentNotAprovedException();
         }
 
-        if (appointment.getAnamnesis() != null){
+        if (appointment.getAnamnesis() != null) {
             throw new AnamnesisAlreadyExistsException();
         }
 

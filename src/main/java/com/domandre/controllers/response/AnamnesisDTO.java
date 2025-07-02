@@ -1,4 +1,4 @@
-package com.domandre.DTOs;
+package com.domandre.controllers.response;
 
 import lombok.Data;
 
@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Data
 public class AnamnesisDTO {
     private Long id;
-    private LocalDateTime createdAt;
     private Boolean hasChronicDisease;
     private String chronicDiseaseDescription;
     private Boolean usesContinuousMedication;
@@ -39,6 +38,7 @@ public class AnamnesisDTO {
     private String contraceptiveDescription;
     private Boolean hasFoodAllergy;
     private String foodAllergyDescription;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String notes;
 }
