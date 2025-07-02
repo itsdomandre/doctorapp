@@ -59,7 +59,7 @@ public class AnamnesisController {
     }
 
     @GetMapping("/patient/{patientId}/last")
-    @PreAuthorize("hasRole(''ADMIN)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> getLastByPatient(@PathVariable UUID patientId) {
         Anamnesis lastAnamnesis = anamnesisService.getLastByPatient(patientId);
         if (lastAnamnesis == null) {
