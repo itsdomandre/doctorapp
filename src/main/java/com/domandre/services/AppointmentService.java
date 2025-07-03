@@ -100,15 +100,11 @@ public class AppointmentService {
         for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)) {
             allPossibleSlots.add(time);
         }
+
         List<LocalDateTime> taken = appointmentRepository.findAllByAppointmentDateBetween(date.atStartOfDay(), date.atTime(23, 59)).stream().map(Appointment::getAppointmentDate).toList();
-        // Filtra os horários disponíveis (que ainda não foram agendados)
         return allPossibleSlots.stream().filter(slot -> {
             LocalDateTime dateTime = LocalDateTime.of(date, slot);
-
-            // Não pode ser um horário passado
             if (dateTime.isBefore(LocalDateTime.now())) return false;
-
-            // Não pode ser um horário já agendado
             boolean alreadyTaken = taken.stream().anyMatch(t -> t.toLocalTime().equals(slot));
 
             return !alreadyTaken;
@@ -132,7 +128,6 @@ public class AppointmentService {
         LocalDateTime from = today.atStartOfDay();
         LocalDateTime to = today.atTime(23, 59);
         return appointmentRepository.findAllByAppointmentDateBetween(from, to);
-        // DateBetween must be 2 arguments (from, to) JPA+DB characteristic
     }
 
     public List<Appointment> getPendingAppointments() {

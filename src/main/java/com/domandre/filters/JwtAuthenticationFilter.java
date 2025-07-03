@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor; // Importando a anotação
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor // Lombok vai gerar o construtor para os campos finais
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService tokenProvider;
@@ -26,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
+    //TODO: Need Refactor
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
