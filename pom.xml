@@ -112,8 +112,11 @@
             <version>5.2.0</version> <!-- mesmo versionamento para evitar incompatibilidades -->
             <scope>test</scope>
         </dependency>
-
-        <!-- Email -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.50.0</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
