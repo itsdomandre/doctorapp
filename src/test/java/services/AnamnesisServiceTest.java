@@ -55,7 +55,6 @@ class AnamnesisServiceTest {
 
     @Test
     void updateByAppointmentId_shouldThrowExceptionWhenAnamnesisIsNull() throws ResourceNotFoundException {
-        // Arrange
         Long appointmentId = 1L;
         AnamnesisRequest request = new AnamnesisRequest();
         Appointment appointment = new Appointment();
@@ -63,7 +62,6 @@ class AnamnesisServiceTest {
 
         when(appointmentService.getOrThrow(appointmentId)).thenReturn(appointment);
 
-        // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> {
             anamnesisService.updateByAppointmentId(appointmentId, request);
         });
