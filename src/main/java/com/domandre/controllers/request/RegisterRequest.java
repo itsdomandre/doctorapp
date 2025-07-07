@@ -1,8 +1,11 @@
 package com.domandre.controllers.request;
 
 import com.domandre.enums.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,18 +23,21 @@ public class RegisterRequest {
     private String firstName;
     @NotBlank(message = "The field lastName is missing")
     private String lastName;
-    @Email(message = "Invalid email")
+    @NotBlank(message = "The field email is missing")
+    @Pattern(
+            regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            message = "Email must include a valid domain (Ex.: @gmail.com)"
+    )
     private String email;
     @NotBlank(message = "The field password is missing")
     private String password;
     @NotBlank(message = "The field phoneNumber is missing")
     private String phoneNumber;
-    @NotBlank(message = "The field Birthdate is missing")
-    @DateTimeFormat(pattern = "yyyyMMdd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "The field Birthdate is missing")
     private LocalDate birthdate;
     private Role role;
 
-    //TODO Printar campos sensíveis de forma a seguir os padrões da LGPD
     @Override
     public String toString() {
         return "RegisterRequest{" +

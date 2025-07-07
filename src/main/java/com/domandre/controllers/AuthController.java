@@ -9,6 +9,7 @@ import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,16 +33,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@RequestBody RegisterRequest request) throws UserAlreadyExistsException {
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) throws UserAlreadyExistsException {
         log.info("Registration attempt for new user: {}", request.getEmail());
         User user = authService.register(request);
         log.info("Registration completed for user: {}", request.getEmail());
         return ResponseEntity.ok(UserMapper.toDTO(user));
-
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
         log.info("Login successful for user: {}", loginRequest.getEmail());

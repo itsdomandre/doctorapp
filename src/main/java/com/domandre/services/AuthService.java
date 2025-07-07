@@ -8,6 +8,7 @@ import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -24,8 +26,9 @@ public class AuthService {
     private final JwtService tokenProvider;
     private final InvalidTokenRepository invalidTokenRepository;
     private final MailService mailService;
-//TODO: Necessário verificar/testar
+
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
+        log.info("Verifying if the user exists...");
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException();
         }
@@ -53,9 +56,10 @@ public class AuthService {
         );
         return tokenProvider.generateToken(authentication);
     }
+
     public boolean isTokenBlacklisted(String token) {
+        log.info("Token invalidated successfully");
         return invalidTokenRepository.existsByToken(token);
     }
-
 }
 
