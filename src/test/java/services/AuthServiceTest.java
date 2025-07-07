@@ -55,7 +55,7 @@ public class AuthServiceTest {
     }
     @Test
     void register_whenEmailAlreadyExists_shouldThrowUserAlreadyExistsException() {
-        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", null, null);
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", LocalDate.of(2000,05,12), Role.USER);
 
         given(userRepository.existsByEmail(request.getEmail())).willReturn(true);
 
