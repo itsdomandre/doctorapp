@@ -1,0 +1,11 @@
+FROM maven:3.9.7-amazoncorretto-17 AS build
+WORKDIR /build
+COPY backend/doctorapp/pom.xml .
+COPY backend/doctorapp/src ./src
+RUN mvn clean package -DskipTests
+
+FROM amazoncorretto:17-alpine
+RUN mkdir -p /var/logs
+COPY --from=build /build/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-Xmx256m","-Xms128m","-jar","/app.jar"]
