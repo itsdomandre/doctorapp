@@ -7,9 +7,8 @@ services:
     mem_limit: 512m
     cpus: 0.5
     volumes:
-      - ../backend:/app
       - ../logs:/var/logs
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: oracle
     ports:
       - "8080:8080"
