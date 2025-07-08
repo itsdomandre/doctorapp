@@ -7,7 +7,7 @@ services:
     mem_limit: 512m
     cpus: 0.5
     volumes:
-      - ../logs:/var/logs
+      - ../../logs:/var/logs
     environment:
       SPRING_PROFILES_ACTIVE: oracle
     ports:
