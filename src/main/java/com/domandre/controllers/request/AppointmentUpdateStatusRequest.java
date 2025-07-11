@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class UpdateAppointmentStatusRequest {
+public class AppointmentUpdateStatusRequest {
     private AppointmentStatus status;
     private UUID doctorId;
 }

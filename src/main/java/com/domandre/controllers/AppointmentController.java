@@ -2,7 +2,7 @@ package com.domandre.controllers;
 
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.controllers.request.AppointmentSearchRequest;
-import com.domandre.controllers.request.UpdateAppointmentStatusRequest;
+import com.domandre.controllers.request.AppointmentUpdateStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
@@ -77,7 +77,7 @@ public class AppointmentController {
 
     @PutMapping("/update/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody UpdateAppointmentStatusRequest request) {
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateStatusRequest request) {
         log.info("Updating appointment status: ID={} | Status={} | Doctor={}", id, request.getStatus(), request.getDoctorId());
         Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
         log.info("Appointment status updated successfully. ID={}", updated.getId());
