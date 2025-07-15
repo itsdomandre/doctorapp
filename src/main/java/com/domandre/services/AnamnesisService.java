@@ -52,6 +52,7 @@ public class AnamnesisService {
         }
 
         Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
+
         anamnesis.setPatient(patient);
         anamnesis.setAppointment(appointment);
         anamnesis.setCreatedAt(LocalDateTime.now());

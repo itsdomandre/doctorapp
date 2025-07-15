@@ -3,6 +3,8 @@ package com.domandre.controllers;
 import com.domandre.controllers.request.AnamnesisRequest;
 import com.domandre.controllers.response.AnamnesisDTO;
 import com.domandre.entities.Anamnesis;
+import com.domandre.entities.Appointment;
+import com.domandre.enums.AppointmentStatus;
 import com.domandre.exceptions.AnamnesisAlreadyExistsException;
 import com.domandre.exceptions.AppointmentNotAprovedException;
 import com.domandre.exceptions.ResourceNotFoundException;
@@ -66,6 +68,22 @@ public class AnamnesisController {
         Anamnesis lastAnamnesis = anamnesisService.getLastByPatient(patientId);
         if (lastAnamnesis == null) {
             return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(AnamnesisMapper.toDTO(lastAnamnesis));
+    }
+
+    @GetMapping("/patient/{patientId}/appointment/{appointmentId}/template")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AnamnesisDTO> getAnamnesisTemplate(@PathVariable UUID patientId, @PathVariable long appointmentId) throws ResourceNotFoundException, AppointmentNotAprovedException {
+        Appointment appointment = appointmentService.getOrThrow(appointmentId);
+        if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
+            log.warn("Tentativa de template de Anamnesis em appointment não aprovado. ID={}", appointmentId);
+            throw new AppointmentNotAprovedException();
+        }
+
+        Anamnesis lastAnamnesis = anamnesisService.getLastByPatient(patientId);
+        if (lastAnamnesis == null) {
+            return ResponseEntity.ok(new AnamnesisDTO());
         }
         return ResponseEntity.ok(AnamnesisMapper.toDTO(lastAnamnesis));
     }

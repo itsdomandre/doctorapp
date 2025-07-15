@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DateTimeRequestIsNotPermittedException.class)
     public ResponseEntity<String> handleDateTimeRequestIsNotPermittedException(DateTimeRequestIsNotPermittedException ex) {
-        return new ResponseEntity<>("Requested Date/Time is occupied", HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>("Requested Date/Time is not available", HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler(NoAppointmentsTodayException.class)
@@ -74,7 +74,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleJsonParseError(HttpMessageNotReadableException ex) {
-        String message = "Invalid request format: Ex.: 2020-01-04" ;
+        String message = "Invalid request format: verify the fields" ;
+
+        if (ex.getMostSpecificCause().getMessage().contains("Cannot deserialize value of type")) {
+            message = "Invalid or missing field. Please verify all mandatory fields.";
+        }
         return new ResponseEntity<>(
                 Map.of("error", message),
                 new HttpHeaders(),
