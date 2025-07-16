@@ -6,8 +6,7 @@ import com.domandre.controllers.request.AppointmentUpdateStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
-import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
-import com.domandre.exceptions.NoAppointmentsTodayException;
+import com.domandre.exceptions.*;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
@@ -39,8 +38,6 @@ public class AppointmentController {
     private final UserService userService;
 
     @PostMapping("/create")
-    // TODO: - Appointment: Anamnesis - Atrelar ao usuário (PacientID)
-    // TODO: - Ao criar Anamnesis -> Retornará o ID da última Anamnesis no momento de preencher
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {
         log.info("Creating appointment for date: {}", request.getDateTime());
         LocalDateTime requestTimeToAppointment = request.getDateTime();
@@ -77,7 +74,7 @@ public class AppointmentController {
 
     @PutMapping("/update/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateStatusRequest request) {
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateStatusRequest request) throws AdminMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {
         log.info("Updating appointment status: ID={} | Status={} | Doctor={}", id, request.getStatus(), request.getDoctorId());
         Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
         log.info("Appointment status updated successfully. ID={}", updated.getId());

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class AnamnesisMapper {
     public static Anamnesis fromRequest(AnamnesisRequest request) {
-        return Anamnesis.builder() // Criando a entity através do request!
+        return Anamnesis.builder() 
                 .hasChronicDisease(request.getHasChronicDisease())
                 .chronicDiseaseDescription(request.getChronicDiseaseDescription())
                 .usesContinuousMedication(request.getUsesContinuousMedication())

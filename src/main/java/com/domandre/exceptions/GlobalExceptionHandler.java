@@ -10,11 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -26,6 +24,7 @@ public class GlobalExceptionHandler {
                 .stream().map(FieldError::getDefaultMessage).collect(Collectors.toList());
         return new ResponseEntity<>(getErrorsMap(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
+
     private Map<String, List<String>> getErrorsMap(List<String> errors) {
         Map<String, List<String>> errorResponse = new HashMap<>();
         errorResponse.put("errors", errors);
@@ -35,11 +34,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return new ResponseEntity<>("User Already Exists.", HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<String> handleForbiddenException(ForbiddenException ex) {
-        return new ResponseEntity<>("User has no privileges to access this action.", HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -72,9 +66,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Patient already has an anamnesis record.", HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(AdminMustBeProvidedException.class)
+    public ResponseEntity<String> handleAdminMustBeProvidedException(AdminMustBeProvidedException ex) {
+        return new ResponseEntity<>("Admin must be provided", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InsufficientPermissionsException.class)
+    public ResponseEntity<String> handleInsufficientPermissionsException(InsufficientPermissionsException ex) {
+        return new ResponseEntity<>("Insufficient Permissions, please check again", HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleJsonParseError(HttpMessageNotReadableException ex) {
-        String message = "Invalid request format: verify the fields" ;
+        String message = "Invalid request format: verify the fields";
 
         if (ex.getMostSpecificCause().getMessage().contains("Cannot deserialize value of type")) {
             message = "Invalid or missing field. Please verify all mandatory fields.";

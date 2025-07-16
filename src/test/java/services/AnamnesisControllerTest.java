@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class AnamnesisControllerTest {
         when(anamnesisService.getLastByPatient(patientId)).thenReturn(lastAnamnesis);
 
         ResponseEntity<AnamnesisDTO> response = anamnesisController.getAnamnesisTemplate(patientId, appointmentId);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         AnamnesisDTO dto = response.getBody();
         assertNotNull(dto);
         assertTrue(dto.getConsumesAlcohol());

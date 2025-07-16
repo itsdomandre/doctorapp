@@ -46,7 +46,6 @@ public class AppointmentServiceTest {
     @Test
     void testGetAvailableSlots_whenOneSlotTaken_shouldExcludeIt() {
         LocalDate nextValidBusinessDay = getNextValidBusinessDay(DayOfWeek.WEDNESDAY);
-        TimeRange range = BusinessHoursHelper.getBusinessHours(DayOfWeek.WEDNESDAY).orElseThrow();
         LocalTime takenTime = LocalTime.of(10, 0);
         LocalDateTime takenDateTime = LocalDateTime.of(nextValidBusinessDay, takenTime);
         Appointment takenAppointment = Appointment.builder().appointmentDate(takenDateTime).build();

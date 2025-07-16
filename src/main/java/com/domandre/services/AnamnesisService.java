@@ -39,7 +39,6 @@ public class AnamnesisService {
     public Anamnesis createAnamnesis(UUID patientId, Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
         User patient = userService.getUserById(patientId);
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime window = now.minusSeconds(1);
 
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
@@ -52,7 +51,6 @@ public class AnamnesisService {
         }
 
         Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
-
         anamnesis.setPatient(patient);
         anamnesis.setAppointment(appointment);
         anamnesis.setCreatedAt(LocalDateTime.now());

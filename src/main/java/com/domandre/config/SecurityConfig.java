@@ -41,10 +41,11 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**").permitAll() // TODO: Logout wont be public
-                        //.requestMatchers(HttpMethod.DELETE, "/api/authors/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/login",
+                                "/api/auth/register"
+                        ).permitAll()
+                        .requestMatchers("/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

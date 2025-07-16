@@ -41,10 +41,9 @@ public class AuthService {
         user.setBirhdate(request.getBirthdate());
         Role role = request.getRole() != null ? request.getRole() : Role.USER;
         user.setRole(role);
-        User requestedNewUser = userRepository.save(user);
-
         //mailService.sendWelcomeEmail(requestedNewUser.getEmail(), requestedNewUser.getFirstName());
-        return requestedNewUser;
+
+        return userRepository.save(user);
     }
 
     public String login(LoginRequest loginRequest) throws BadCredentialsException {

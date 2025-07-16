@@ -71,5 +71,4 @@ public class JwtService {
 
         return claims.getExpiration();
     }
-
 }

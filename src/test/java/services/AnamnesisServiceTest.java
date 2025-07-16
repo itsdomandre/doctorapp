@@ -29,7 +29,6 @@ class AnamnesisServiceTest {
 
     @Test
     void updateByAppointmentId_shouldUpdateFieldsAndSave() throws ResourceNotFoundException {
-        // Arrange
         Long appointmentId = 1L;
 
         AnamnesisRequest request = new AnamnesisRequest();
@@ -43,10 +42,8 @@ class AnamnesisServiceTest {
         when(appointmentService.getOrThrow(appointmentId)).thenReturn(appointment);
         when(anamnesisRepository.save(any(Anamnesis.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act
         Anamnesis updated = anamnesisService.updateByAppointmentId(appointmentId, request);
 
-        // Assert
         assertNotNull(updated);
         assertTrue(updated.getHasChronicDisease());
         assertEquals("Hypertension", updated.getChronicDiseaseDescription());

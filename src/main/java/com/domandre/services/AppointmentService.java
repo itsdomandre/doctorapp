@@ -6,7 +6,9 @@ import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
+import com.domandre.exceptions.AdminMustBeProvidedException;
 import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
+import com.domandre.exceptions.InsufficientPermissionsException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;
@@ -36,7 +38,7 @@ public class AppointmentService {
     public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
         User patient = UserService.getCurrentUser();
         boolean existsAppointment = appointmentRepository.existsByAppointmentDate(request.getDateTime());
-        if (existsAppointment == true) {
+        if (existsAppointment) {
             throw new DateTimeRequestIsNotPermittedException();
         }
         Appointment appointment = Appointment.builder().
@@ -69,17 +71,17 @@ public class AppointmentService {
         return appointmentRepository.findByPatient(currentUser);
     }
 
-    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) {
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Appointment not found"));
+    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) throws AdminMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
 
         appointment.setStatus(newStatus);
         if (newStatus == AppointmentStatus.APPROVED) {
             if (doctorId == null) {
-                throw new RuntimeException("Doctor ID must be provided");
+                throw new AdminMustBeProvidedException();
             }
             User doctor = userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found."));
             if (doctor.getRole() != Role.ADMIN) {
-                throw new RuntimeException("Selected user is not doctor");
+                throw new InsufficientPermissionsException();
             }
             appointment.setDoctor(doctor);
             appointment.setUpdatedAt(LocalDateTime.now());
