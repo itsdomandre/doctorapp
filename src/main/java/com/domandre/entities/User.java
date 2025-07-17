@@ -1,6 +1,7 @@
 package com.domandre.entities;
 
 import com.domandre.enums.Role;
+import com.domandre.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,7 +39,7 @@ public class User implements UserDetails {
     private String password;
     private String phoneNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
-    private LocalDate birhdate;
+    private LocalDate birthdate;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
