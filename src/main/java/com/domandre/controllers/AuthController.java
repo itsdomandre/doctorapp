@@ -9,9 +9,11 @@ import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,20 +43,38 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
-        log.info("Login successful for user: {}", loginRequest.getEmail());
-        return ResponseEntity.ok("User: " + loginRequest.getEmail() + " logged succesfully! \n\nToken: " + token);
+        log.info("Login successful for user: {}", loginRequest.getEmail() + token);
+        ResponseCookie jwtCookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60)
+                .sameSite("Strict")
+                .build();
+
+        response.setHeader("Set-Cookie", jwtCookie.toString());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
+    public ResponseEntity<String> logout(@CookieValue(name = "token", required = false) String token, HttpServletResponse response) {
+        if (token != null) {
+            jwtService.invalidateToken(token);
+            ResponseCookie deleteCookie = ResponseCookie.from("token", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(0)
+                    .sameSite("Strict")
+                    .build();
+
+            response.setHeader("Set-Cookie", deleteCookie.toString());
+            log.info("Logout successfully and cookie deleted");
         }
-        jwtService.invalidateToken(token);
-        log.info("Logout successfully");
+
         return ResponseEntity.ok("Logout successfully");
     }
 
