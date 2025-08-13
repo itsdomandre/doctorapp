@@ -4,6 +4,7 @@ import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
+import com.domandre.exceptions.InvalidTokenException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
+
+    @Value("${app.cookie.secure}")
+    private boolean appCookieSecure;
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated")
@@ -43,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) throws InvalidTokenException {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
         log.info("Login successful for user: {}", loginRequest.getEmail() + token);
@@ -56,25 +61,41 @@ public class AuthController {
                 .build();
 
         response.setHeader("Set-Cookie", jwtCookie.toString());
-        return ResponseEntity.ok().build();
+        // TODO: Temporary token response
+        return ResponseEntity.ok(token);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(@CookieValue(name = "token", required = false) String token, HttpServletResponse response) {
-        if (token != null) {
-            // TODO: Rever essa parte
-            jwtService.invalidateToken(token);
-            ResponseCookie deleteCookie = ResponseCookie.from("token", "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(0)
-                    .sameSite("Strict")
-                    .build();
+    @PostMapping("/activate")
+    public ResponseEntity<String> activateAccount(@RequestParam String token) {
+        authService.activateAccount(token);
+        return ResponseEntity.ok("Account activated successfully");
+    }
 
-            response.setHeader("Set-Cookie", deleteCookie.toString());
-            log.info("Logout successfully");
-        }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
+        authService.sendPasswordResetToken(email);
+        return ResponseEntity.ok("If the email exists, a reset link was sent");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        authService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Password reset successfully");
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        ResponseCookie deleteCookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(appCookieSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        response.setHeader("Set-Cookie", deleteCookie.toString());
+        log.info("Logout successfully");
 
         return ResponseEntity.ok("Logout successfully");
     }

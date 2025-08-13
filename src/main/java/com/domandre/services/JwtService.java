@@ -1,75 +1,86 @@
 package com.domandre.services;
 
-import com.domandre.entities.InvalidToken;
-import com.domandre.repositories.InvalidTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class JwtService {
 
-    private final InvalidTokenRepository invalidTokenRepository;
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    @Value("${security.jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${security.jwt.expiration-ms}")
+    private long jwtExpirationInMs;
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
+        String role = authentication.getAuthorities()
+                .iterator()
+                .next()
+                .getAuthority();
         Date now = new Date();
-        long jwtExpirationInMs = 3600000;
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(key)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String generateTokenToActivatonOrReset(String email, long jwtExpirationInMs, String type) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("type", type)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+        return parseClaims(token).getSubject();
+    }
+
+    public String getTypeFromJWT(String token) {
+        return parseClaims(token).get("type", String.class);
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
-        return claims.getSubject();
     }
-
 
     public boolean validateToken(String token) {
-        System.out.println("🛡Validating token...");
         try {
-            if (invalidTokenRepository.existsByToken(token)) {
-                return false;
-            }
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            parseClaims(token);
             return true;
         } catch (Exception ex) {
-            System.out.println("Invalid Token " + ex.getMessage());
             return false;
         }
-    }
-
-    public void invalidateToken(String token) {
-        invalidTokenRepository.save(new InvalidToken(token, getExpirationDateFromJWT(token)));
-    }
-
-    public Date getExpirationDateFromJWT(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getExpiration();
     }
 }
