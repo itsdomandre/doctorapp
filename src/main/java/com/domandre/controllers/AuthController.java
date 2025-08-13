@@ -62,6 +62,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@CookieValue(name = "token", required = false) String token, HttpServletResponse response) {
         if (token != null) {
+            // TODO: Rever essa parte
             jwtService.invalidateToken(token);
             ResponseCookie deleteCookie = ResponseCookie.from("token", "")
                     .httpOnly(true)
@@ -72,12 +73,10 @@ public class AuthController {
                     .build();
 
             response.setHeader("Set-Cookie", deleteCookie.toString());
-            log.info("Logout successfully and cookie deleted");
+            log.info("Logout successfully");
         }
 
         return ResponseEntity.ok("Logout successfully");
     }
-
     //TODO: [2]: Implementar confirmation(com token), password reset
-    //TODO: [3]: Implementar a invalidação de token, sem necessidade de "store"
 }
