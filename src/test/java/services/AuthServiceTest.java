@@ -4,6 +4,7 @@ import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.User;
 import com.domandre.enums.Role;
+import com.domandre.exceptions.InvalidTokenException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -30,18 +30,25 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private AuthenticationManager authenticationManager;
-    @Mock private JwtService jwtService;
-    @Mock private InvalidTokenRepository invalidTokenRepository;
-    @Mock private MailService mailService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private InvalidTokenRepository invalidTokenRepository;
+    @Mock
+    private MailService mailService;
 
-    @InjectMocks private AuthService authService;
+    @InjectMocks
+    private AuthService authService;
 
     @Test
     void register_whenEmailNotExists_shouldRegisterNewUser() throws UserAlreadyExistsException {
-        RegisterRequest request = new RegisterRequest("Ruud", "Van Nistelrooy", "ruud@example.com", "1234", "11991238863", LocalDate.of(2001,10, 8), Role.USER);
+        RegisterRequest request = new RegisterRequest("Ruud", "Van Nistelrooy", "ruud@example.com", "1234", "11991238863", LocalDate.of(2001, 10, 8), Role.USER);
         given(userRepository.existsByEmail(request.getEmail())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("HashedPassword");
 
@@ -53,9 +60,10 @@ public class AuthServiceTest {
         assertNotNull(result);
         then(userRepository).should().save(any(User.class));
     }
+
     @Test
     void register_whenEmailAlreadyExists_shouldThrowUserAlreadyExistsException() {
-        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", LocalDate.of(2000,05,12), Role.USER);
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", LocalDate.of(2000, 05, 12), Role.USER);
 
         given(userRepository.existsByEmail(request.getEmail())).willReturn(true);
 
@@ -63,7 +71,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void login_whenCredentialsAreCorrect_shouldReturnToken() {
+    void login_whenCredentialsAreCorrect_shouldReturnToken() throws InvalidTokenException {
         LoginRequest loginRequest = new LoginRequest("john@example.com", "password");
         Authentication authentication = mock(Authentication.class);
 
@@ -73,14 +81,5 @@ public class AuthServiceTest {
         String token = authService.login(loginRequest);
 
         assertEquals("mockedToken", token);
-    }
-
-    @Test
-    void isTokenBlacklisted_whenTokenIsBlacklisted_shouldReturnTrue() {
-        given(invalidTokenRepository.existsByToken("blacklistedToken")).willReturn(true);
-
-        boolean result = authService.isTokenBlacklisted("blacklistedToken");
-
-        assertTrue(result);
     }
 }

@@ -44,6 +44,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Anamnesis> anamneses = new ArrayList<>();
 

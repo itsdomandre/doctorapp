@@ -90,4 +90,9 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<String> handleInsufficientPermissionsException(InvalidTokenException ex) {
+        return new ResponseEntity<>("Invalid activation token", HttpStatus.CONFLICT);
+    }
+
 }
