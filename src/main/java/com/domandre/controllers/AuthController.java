@@ -99,5 +99,7 @@ public class AuthController {
 
         return ResponseEntity.ok("Logout successfully");
     }
+
     //TODO: [2]: Implementar confirmation(com token), password reset
+    //TODO: [3]: Implementar a invalidação de token, sem necessidade de "store"
 }
