@@ -2,6 +2,7 @@ package com.domandre.controllers;
 
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
+import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
 import com.domandre.exceptions.InvalidTokenException;
@@ -78,10 +79,23 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        authService.resetPassword(token, newPassword);
+    public ResponseEntity<String> resetPassword(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @Valid @RequestBody ResetPasswordRequest body) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Missing Authorization: Bearer <token>");
+        }
+
+        String token = authHeader.substring(7);
+
+        if (body.getConfirmNewPassword() != null &&
+                !body.getNewPassword().equals(body.getConfirmNewPassword())) {
+            return ResponseEntity.badRequest().body("New password and confirm do not match");
+        }
+        authService.resetPassword(token, body.getNewPassword());
         return ResponseEntity.ok("Password reset successfully");
     }
+
 
     @PostMapping("/resend-activation")
     public ResponseEntity<String> resendActivation(@RequestParam String email) {

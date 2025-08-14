@@ -105,7 +105,7 @@ public class AuthService {
     public void sendPasswordResetToken(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             String resetToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
-            mailService.sendResetEmail(email, resetToken);
+            //mailService.sendResetEmail(email, resetToken);
             if (logTokens) {
                 log.info("[DEV] Password reset token for {}: {}", email, resetToken);
             }
