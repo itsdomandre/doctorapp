@@ -30,7 +30,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
 
-    @Value("${app.cookie.secure}")
+    @Value("${app.cookie.secure:false}")
     private boolean appCookieSecure;
 
     @GetMapping("/me")
@@ -55,7 +55,7 @@ public class AuthController {
         log.info("Login successful for user: {}", loginRequest.getEmail() + token);
         ResponseCookie jwtCookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(true)
+                .secure(appCookieSecure)
                 .path("/")
                 .maxAge(60 * 60)
                 .sameSite("Strict")
