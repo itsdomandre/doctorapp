@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/activate",
                                 "/api/auth/forgot-password",
-                                "/api/auth/reset-password"
+                                "/api/auth/reset-password",
+                                "/api/auth/resend-activation"
                         ).permitAll()
                         .requestMatchers("/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll()

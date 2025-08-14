@@ -33,6 +33,12 @@ public class AuthService {
     @Value("${app.log.tokens:false}")
     private boolean logTokens;
 
+    @Value("${auth.activation.expiration-ms:86400000}")
+    private long activationTokenTtlMs;
+
+    @Value("${auth.reset.expiration-ms:900000}")
+    private long resetTokenTtlMs;
+
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
         log.info("Verifying if the user exists...");
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -93,6 +99,7 @@ public class AuthService {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         // mailService.sendWelcomeEmail(user.getEmail(), activationToken);
+        log.info("[DEV] Account activated : {}", email);
     }
 
     public void sendPasswordResetToken(String email) {
@@ -114,6 +121,22 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public void resendActivation(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.getStatus() == UserStatus.UNVERIFIED) {
+                String token = jwtService.generateTokenToActivatonOrReset(email, activationTokenTtlMs, "activation");
+                // mailService.sendActivationEmail(email, token);
+
+                if (logTokens) {
+                    // log.info("[DEV] Resent activation token for {}: {}", email, token);
+                    log.info("[DEV] Activate via backend: /api/auth/activate?token={}", token);
+                }
+            } else {
+                log.info("Resend activation called for {} but status is {}", email, user.getStatus());
+            }
+        });
     }
 }
 

@@ -83,6 +83,11 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
+    @PostMapping("/resend-activation")
+    public ResponseEntity<String> resendActivation(@RequestParam String email) {
+        authService.resendActivation(email);
+        return ResponseEntity.ok("If the account exists and is pending, an activation email was resent");
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
@@ -99,7 +104,4 @@ public class AuthController {
 
         return ResponseEntity.ok("Logout successfully");
     }
-
-    //TODO: [2]: Implementar confirmation(com token), password reset
-    //TODO: [3]: Implementar a invalidação de token, sem necessidade de "store"
 }
