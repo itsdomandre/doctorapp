@@ -2,6 +2,7 @@ package com.domandre.controllers.response;
 
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Procedures;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class AppointmentDTO {
     private Long id;
     private String patientName;
     private Procedures procedure;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateTime;
     private AppointmentStatus status;
     private LocalDateTime updatedAt = LocalDateTime.now();
