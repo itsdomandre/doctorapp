@@ -1,6 +1,7 @@
 package com.domandre.controllers.request;
 
 import com.domandre.enums.Procedures;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class AppointmentRequest {
     @NotNull(message = "Date/hour is Mandatory")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateTime;
     @NotNull(message = "Procedure is Mandatory")
     private Procedures procedure;
