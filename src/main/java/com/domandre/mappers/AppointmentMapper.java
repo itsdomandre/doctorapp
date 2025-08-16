@@ -8,6 +8,7 @@ public class AppointmentMapper {
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(appointment.getId());
         dto.setDateTime(appointment.getAppointmentDate());
+        dto.setProcedure(appointment.getProcedure());
         dto.setStatus(appointment.getStatus());
         dto.setNotes(appointment.getNotes());
         dto.setUpdatedAt(appointment.getUpdatedAt());
