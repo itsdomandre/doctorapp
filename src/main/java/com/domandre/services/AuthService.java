@@ -57,7 +57,7 @@ public class AuthService {
 
         userRepository.save(user);
         String activationToken = jwtService.generateTokenToActivatonOrReset(user.getEmail(), 86400000, "activation");
-        // mailService.sendActivationEmail(user.getEmail(), activationToken);
+        mailService.sendActivationEmail(user.getEmail(), activationToken);
 
         log.info("User {} registered as PENDING and activation email sent.", user.getEmail());
         if (logTokens) {
@@ -98,14 +98,14 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
-        // mailService.sendWelcomeEmail(user.getEmail(), activationToken);
+        mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
         log.info("[DEV] Account activated : {}", email);
     }
 
     public void sendPasswordResetToken(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             String resetToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
-            //mailService.sendResetEmail(email, resetToken);
+            mailService.sendResetEmail(email, resetToken);
             if (logTokens) {
                 log.info("[DEV] Password reset token for {}: {}", email, resetToken);
             }

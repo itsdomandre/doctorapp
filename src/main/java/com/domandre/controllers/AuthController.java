@@ -10,6 +10,7 @@ import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
+import com.domandre.services.MailService;
 import com.domandre.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 
 public class AuthController {
     private final AuthService authService;
-    private final JwtService jwtService;
 
     @Value("${app.cookie.secure:false}")
     private boolean appCookieSecure;

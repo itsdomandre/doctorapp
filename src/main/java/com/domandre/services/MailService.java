@@ -2,20 +2,17 @@ package com.domandre.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender mailSender;
-
-    @Value("${mail.confirmation.sender}")
-    private String sender;
 
     @Value("${app.backend.url}")
     private String backendUrl;
@@ -86,6 +83,4 @@ public class MailService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
-
-
 }
