@@ -116,8 +116,6 @@ public class AnamnesisService {
         if (request.getNotes() != null) anamnesis.setNotes(request.getNotes());
 
         anamnesis.setUpdatedAt(LocalDateTime.now());
-
         return repository.save(anamnesis);
     }
-
 }

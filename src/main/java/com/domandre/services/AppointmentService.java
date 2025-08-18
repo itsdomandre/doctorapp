@@ -31,9 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
-    private final UserService userService;
     private final UserRepository userRepository;
-    private final AnamnesisRepository anamnesisRepository;
 
     public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
         User patient = UserService.getCurrentUser();

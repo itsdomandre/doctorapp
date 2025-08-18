@@ -80,7 +80,6 @@ public class AnamnesisController {
             log.warn("Tentativa de template de Anamnesis em appointment não aprovado. ID={}", appointmentId);
             throw new AppointmentNotAprovedException();
         }
-
         Anamnesis lastAnamnesis = anamnesisService.getLastByPatient(patientId);
         if (lastAnamnesis == null) {
             return ResponseEntity.ok(new AnamnesisDTO());

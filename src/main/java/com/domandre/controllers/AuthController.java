@@ -9,8 +9,6 @@ import com.domandre.exceptions.InvalidTokenException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
-import com.domandre.services.JwtService;
-import com.domandre.services.MailService;
 import com.domandre.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -96,7 +94,6 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
-
     @PostMapping("/resend-activation")
     public ResponseEntity<String> resendActivation(@RequestParam String email) {
         authService.resendActivation(email);
@@ -115,7 +112,6 @@ public class AuthController {
 
         response.setHeader("Set-Cookie", deleteCookie.toString());
         log.info("Logout successfully");
-
         return ResponseEntity.ok("Logout successfully");
     }
 }

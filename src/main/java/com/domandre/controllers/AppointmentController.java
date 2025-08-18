@@ -35,7 +35,6 @@ import java.util.List;
 
 public class AppointmentController {
     private final AppointmentService appointmentService;
-    private final UserService userService;
 
     @PostMapping("/create")
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {

@@ -27,7 +27,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final InvalidTokenRepository invalidTokenRepository;
     private final MailService mailService;
 
     @Value("${app.log.tokens:false}")
@@ -35,9 +34,6 @@ public class AuthService {
 
     @Value("${auth.activation.expiration-ms:86400000}")
     private long activationTokenTtlMs;
-
-    @Value("${auth.reset.expiration-ms:900000}")
-    private long resetTokenTtlMs;
 
     public User register(RegisterRequest request) throws UserAlreadyExistsException {
         log.info("Verifying if the user exists...");
@@ -81,11 +77,9 @@ public class AuthService {
             throw new InvalidTokenException();
         }
         String jwt = jwtService.generateToken(authentication);
-
         if (logTokens) {
             log.info("[DEV] Access JWT for {}: {}", user.getEmail(), jwt);
         }
-
         return jwtService.generateToken(authentication);
     }
 

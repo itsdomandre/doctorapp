@@ -12,6 +12,5 @@ import java.util.UUID;
 @Repository
 public interface AnamnesisRepository extends JpaRepository<Anamnesis, Long> {
     List<Anamnesis> findAllByPatientId(UUID patientId);
-    boolean existsByPatientAndCreatedAtAfter(User patient, LocalDateTime window);
     Anamnesis findTopByPatientIdOrderByCreatedAtDesc(UUID patientId);
 }
