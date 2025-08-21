@@ -33,11 +33,8 @@ public class RegisterUiTest extends BaseTest {
     @Test
     void register_happyPath_shouldShowSuccessFeedback() {
         String email = uniqueEmail();
-
         page.navigate(FE_URL + "/register");
 
-
-        // Preenchimento pelos placeholders/labels que já existem
         page.locator("input[name='firstName']").fill("Malaquias");
         page.locator("input[name='lastName']").fill("Nistelrooy");
         page.locator("input[name='email']").fill(email);
@@ -46,14 +43,12 @@ public class RegisterUiTest extends BaseTest {
         page.locator("input[name='phoneNumber']").fill("11991238863");
         page.locator("input[name='birthdate']").fill("2001-10-08");
 
-        // Submete e aguarda a resposta 200 do backend
         Response resp = page.waitForResponse(
                 r -> r.url().contains("/api/auth/register") && r.status() == 200,
                 () -> page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Criar conta")).click()
         );
         assertEquals(200, resp.status(), "Registro deveria retornar 200");
 
-        // Feedback de sucesso (ajusta os textos conforme tua UI)
         boolean success =
                 page.getByText("Verifique seu e-mail").isVisible()
                         || page.getByText("Cadastro realizado").isVisible()
@@ -66,7 +61,7 @@ public class RegisterUiTest extends BaseTest {
     void register_whenEmailAlreadyExists_shouldShowDuplicateError() {
         String email = uniqueEmail();
 
-        // Pré-condição: cria usuário via API (mais rápido/estável que pela UI)
+        // Pré-condição: cria usuário via API (o teste tem que ser "independente")
         APIRequestContext api = playwright.request()
                 .newContext(new APIRequest.NewContextOptions().setBaseURL(BE_URL));
         try {
@@ -103,7 +98,6 @@ public class RegisterUiTest extends BaseTest {
         page.locator("input[name='phoneNumber']").fill("11991238863");
         page.locator("input[name='birthdate']").fill("2001-10-08");
 
-        // Espera a resposta 409 do backend
         Response resp = page.waitForResponse(
                 r -> r.url().contains("/api/auth/register") && r.status() == 409,
                 () -> page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Criar conta")).click()
@@ -130,7 +124,6 @@ public class RegisterUiTest extends BaseTest {
 
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Criar conta")).click();
 
-        // Validação client-side (ajusta texto conforme tua implementação)
         boolean clientError =
                 page.getByText("Endereço de e-mail inválido.").isVisible()
                         || page.getByText("Email must include a valid domain").isVisible()
