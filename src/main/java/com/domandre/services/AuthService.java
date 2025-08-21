@@ -7,7 +7,6 @@ import com.domandre.enums.Role;
 import com.domandre.enums.UserStatus;
 import com.domandre.exceptions.InvalidTokenException;
 import com.domandre.exceptions.UserAlreadyExistsException;
-import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +53,6 @@ public class AuthService {
         userRepository.save(user);
         String activationToken = jwtService.generateTokenToActivatonOrReset(user.getEmail(), 86400000, "activation");
         mailService.sendActivationEmail(user.getEmail(), activationToken);
-
         log.info("User {} registered as PENDING and activation email sent.", user.getEmail());
         if (logTokens) {
             // log.info("[DEV] Activation token for {}: {}", user.getEmail(), activationToken);
@@ -98,11 +96,8 @@ public class AuthService {
 
     public void sendPasswordResetToken(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
-            String resetToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
-            mailService.sendResetEmail(email, resetToken);
-            if (logTokens) {
-                log.info("[DEV] Password reset token for {}: {}", email, resetToken);
-            }
+            String newToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
+            mailService.sendResetEmailPassword(email, newToken);
         });
     }
 
@@ -110,7 +105,6 @@ public class AuthService {
         if (!jwtService.validateToken(token) || !"password_reset".equals(jwtService.getTypeFromJWT(token))) {
             throw new RuntimeException("Invalid password reset token");
         }
-
         String email = jwtService.getUsernameFromJWT(token);
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -124,7 +118,6 @@ public class AuthService {
                 // mailService.sendActivationEmail(email, token);
 
                 if (logTokens) {
-                    // log.info("[DEV] Resent activation token for {}: {}", email, token);
                     log.info("[DEV] Activate via backend: /api/auth/activate?token={}", token);
                 }
             } else {

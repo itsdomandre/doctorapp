@@ -37,9 +37,7 @@ public class AppointmentServiceTest {
 
         appointmentService = new AppointmentService(
                 appointmentRepository,
-                userService,
-                userRepository,
-                anamnesisRepository
+                userRepository
         );
     }
 

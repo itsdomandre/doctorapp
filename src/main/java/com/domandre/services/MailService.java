@@ -41,7 +41,7 @@ public class MailService {
         );
     }
 
-    public void sendResetEmail(String to, String token) {
+    public void sendResetEmailPassword(String to, String token) {
         String link;
         if (frontendUrl == null || frontendUrl.isBlank()) {
             link = backendUrl + "/api/auth/reset-password?token=" + token;
