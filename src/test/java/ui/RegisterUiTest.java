@@ -1,6 +1,6 @@
 package ui;
 
-import base.BaseTest;
+import base.BaseUiTest;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.RequestOptions;
@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RegisterUiTest extends BaseTest {
+public class RegisterUiTest extends BaseUiTest {
 
     private BrowserContext ctx;
     private Page page;

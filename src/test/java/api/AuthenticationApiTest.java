@@ -1,6 +1,6 @@
 package api;
 
-import base.BaseTest;
+import base.BaseUiTest;
 import com.microsoft.playwright.APIRequest;
 import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
@@ -14,7 +14,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RegisterApiTest extends BaseTest {
+public class AuthenticationApiTest extends BaseUiTest {
 
     private APIRequestContext api;
 

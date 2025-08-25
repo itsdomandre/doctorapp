@@ -4,7 +4,7 @@ import com.microsoft.playwright.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-public abstract class BaseTest {
+public abstract class BaseUiTest {
     protected static Playwright playwright;
     protected static Browser browser;
 
