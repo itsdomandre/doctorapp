@@ -1,0 +1,8 @@
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:1025:1025"
+      - "0.0.0.0:8082:8025"
