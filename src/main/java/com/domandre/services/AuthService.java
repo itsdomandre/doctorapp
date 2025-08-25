@@ -90,8 +90,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
-        mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
-        log.info("[DEV] Account activated : {}", email);
+        if (user.getStatus().equals(UserStatus.ACTIVE)) {
+            mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+            log.info("[DEV] Account activated : {}", email);
+        }
     }
 
     public void sendPasswordResetToken(String email) {
