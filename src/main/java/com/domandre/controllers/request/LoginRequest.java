@@ -3,8 +3,10 @@ package com.domandre.controllers.request;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequest {
     @NotEmpty(message = "Email cannot be in blank")

@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LoginTest {
     protected static final String FE_URL = System.getProperty("FE_URL", "http://localhost:5173");
-    protected static final String BE_URL = System.getProperty("BE_URL", "http://localhost:8080");
     static Playwright playwright;
     static Browser browser;
     BrowserContext browserContext;
@@ -42,7 +41,7 @@ public class LoginTest {
     void shouldLoginSuccessfully() {
         page.navigate(FE_URL + "/login");
 
-        page.locator("input[name='email']").fill("r10@example.com");
+        page.locator("input[name='email']").fill("r9@example.com");
         page.locator("input[name='password']").fill("123456");
 
         page.click("button[type=submit]");

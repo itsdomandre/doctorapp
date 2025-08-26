@@ -60,7 +60,6 @@ public class AuthController {
                 .build();
 
         response.setHeader("Set-Cookie", jwtCookie.toString());
-        // TODO: Temporary token response
         return ResponseEntity.ok(token);
     }
 
