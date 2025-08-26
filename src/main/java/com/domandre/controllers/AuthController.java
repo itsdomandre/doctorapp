@@ -65,9 +65,9 @@ public class AuthController {
     }
 
     @PostMapping("/activate")
-    public ResponseEntity<String> activateAccount(@RequestParam String token) {
+    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) {
         authService.activateAccount(token);
-        return ResponseEntity.ok("Account activated successfully");
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/forgot-password")
