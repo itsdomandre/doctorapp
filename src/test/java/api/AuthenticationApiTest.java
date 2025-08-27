@@ -1,20 +1,15 @@
 package api;
 
 import base.BaseApiTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.BDDMockito.then;
 
 public class AuthenticationApiTest extends BaseApiTest {
-    private final ObjectMapper om = new ObjectMapper();
 
     private String uniqueEmail() {
         return "malaquias" + UUID.randomUUID().toString().substring(0, 6) + "@example.com"; // ficou dessa maneira para não dar conflito na sequencia dos testes
@@ -30,12 +25,24 @@ public class AuthenticationApiTest extends BaseApiTest {
         public String role;
     }
 
+    private RegisterRequestPayload invalidPayload(String email) {
+        RegisterRequestPayload p = new RegisterRequestPayload();
+        p.firstName = "Malaquias";
+        p.lastName = "Nistelrooy";
+        p.email = email;
+        p.password = "PwNoRequirements";
+        p.phoneNumber = "11991238863";
+        p.birthdate = "2001-10-08";
+        p.role = "USER";
+        return p;
+    }
+
     private RegisterRequestPayload validPayload(String email) {
         RegisterRequestPayload p = new RegisterRequestPayload();
         p.firstName = "Malaquias";
         p.lastName = "Nistelrooy";
         p.email = email;
-        p.password = "1234";
+        p.password = "P4$$w0rd";
         p.phoneNumber = "11991238863";
         p.birthdate = "2001-10-08";
         p.role = "USER";
@@ -43,7 +50,7 @@ public class AuthenticationApiTest extends BaseApiTest {
     }
 
     @Test
-    void register_whenEmailNotExists_shouldReturn200_andDTO() throws JsonProcessingException {
+    void register_whenEmailNotExists_shouldReturn200_andDTO() {
         String email = uniqueEmail();
 
         given()
@@ -97,10 +104,17 @@ public class AuthenticationApiTest extends BaseApiTest {
                 .body(containsString("Email must include a valid domain (Ex.: @gmail.com)"));
     }
 
-    // TODO: Test
     @Test
-    void register_whenPasswordDoesNotMeetRequirements_shouldReturn400 (){
+    void register_whenPasswordDoesNotMeetRequirements_shouldReturn400() {
         String email = uniqueEmail();
 
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidPayload(email))
+                .when()
+                .post("/auth/register")
+                .then()
+                .statusCode(400)
+                .body(containsString("Password must contain at least one uppercase letter and one special character"));
     }
 }
