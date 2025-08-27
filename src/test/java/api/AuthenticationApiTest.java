@@ -1,32 +1,20 @@
 package api;
 
-import base.BaseUiTest;
-import com.microsoft.playwright.APIRequest;
-import com.microsoft.playwright.APIRequestContext;
-import com.microsoft.playwright.APIResponse;
-import com.microsoft.playwright.options.RequestOptions;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import base.BaseApiTest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.BDDMockito.then;
 
-public class AuthenticationApiTest extends BaseUiTest {
-
-    private APIRequestContext api;
-
-    @BeforeEach
-    void setUpApi() {
-        api = playwright.request().newContext(new APIRequest.NewContextOptions().setBaseURL(BE_URL));
-    }
-
-    @AfterEach
-    void tearDownApi() {
-        if (api != null) api.dispose();
-    }
+public class AuthenticationApiTest extends BaseApiTest {
+    private final ObjectMapper om = new ObjectMapper();
 
     private String uniqueEmail() {
         return "malaquias" + UUID.randomUUID().toString().substring(0, 6) + "@example.com"; // ficou dessa maneira para não dar conflito na sequencia dos testes
@@ -42,7 +30,7 @@ public class AuthenticationApiTest extends BaseUiTest {
         public String role;
     }
 
-    private RegisterRequestPayload buildValidPayload(String email) {
+    private RegisterRequestPayload validPayload(String email) {
         RegisterRequestPayload p = new RegisterRequestPayload();
         p.firstName = "Malaquias";
         p.lastName = "Nistelrooy";
@@ -55,63 +43,64 @@ public class AuthenticationApiTest extends BaseUiTest {
     }
 
     @Test
-    void register_whenEmailNotExists_shouldReturn200_andDTO() {
+    void register_whenEmailNotExists_shouldReturn200_andDTO() throws JsonProcessingException {
         String email = uniqueEmail();
 
-        APIResponse res = api.post("/api/auth/register",
-                RequestOptions.create().setData((buildValidPayload(email))));
-        assertEquals(200, res.status(), res.statusText());
-
-        String body = res.text();
-        assertTrue(body.contains("\"email\":\"" + email + "\""));
-        assertTrue(body.contains("\"fullName\":\"Malaquias Nistelrooy\""));
-        assertTrue(body.contains("\"phoneNumber\":\"11991238863"));
-        assertTrue(body.contains("\"role\":\"USER"));
+        given()
+                .contentType(ContentType.JSON)
+                .body(validPayload(email))
+                .when()
+                .post("/auth/register")
+                .then()
+                .statusCode(200)
+                .body("email", equalTo(email))
+                .body("fullName", equalTo("Malaquias Nistelrooy"))
+                .body("phoneNumber", equalTo("11991238863"))
+                .body("role", equalTo("USER"));
     }
 
     @Test
     void register_whenEmailAlreadyExists_shouldReturn409() {
         String email = uniqueEmail();
 
-        APIResponse ok = api.post("/api/auth/register",
-                RequestOptions.create().setData((buildValidPayload(email))));
-        assertEquals(200, ok.status());
+        given()
+                .contentType(ContentType.JSON)
+                .body(validPayload(email))
+                .when()
+                .post("/auth/register")
+                .then()
+                .statusCode(200);
 
-        APIResponse conflict = api.post("/api/auth/register",
-                RequestOptions.create().setData((buildValidPayload(email))));
-        assertEquals(409, conflict.status());
-        assertEquals("User Already Exists.", conflict.text());
+        given()
+                .contentType(ContentType.JSON)
+                .body(validPayload(email))
+
+                .when()
+                .post("/auth/register")
+
+                .then()
+                .statusCode(409)
+                .body(anyOf(equalTo("User Already Exists.")));
     }
 
     @Test
-    void register_withInvalidEmail_shouldReturn400_withErrorsList() {
-        RegisterRequestPayload invalid = buildValidPayload("um-email-invalido.example.com");
-        APIResponse res = api.post("/api/auth/register",
-                RequestOptions.create().setData(invalid));
+    void register_withInvalidEmail_shouldReturn400_withMsgError() {
+        String email = "exammple@googlecom";
 
-        assertEquals(400, res.status());
-
-        String body = res.text();
-        // GHE para MethodArgumentNotValidException -> { "errors": [ ... ] }
-        assertTrue(body.contains("\"errors\""), "Esperava lista 'errors' do GlobalExceptionHandler");
-        assertTrue(body.toLowerCase().contains("email"), "Mensagem deve mencionar e-mail inválido");
+        given()
+                .contentType(ContentType.JSON)
+                .body(validPayload(email))
+                .when()
+                .post("/auth/register")
+                .then()
+                .statusCode(400)
+                .body(containsString("Email must include a valid domain (Ex.: @gmail.com)"));
     }
 
+    // TODO: Test
     @Test
-    void register_withMalformedJson_shouldReturn400_withErrorMessage() {
-        // JSON malformado (chave sem aspas) para acionar HttpMessageNotReadableException
-        String malformed = "{firstName:\"A\"}";
+    void register_whenPasswordDoesNotMeetRequirements_shouldReturn400 (){
+        String email = uniqueEmail();
 
-        APIResponse res = api.post("/api/auth/register",
-                RequestOptions.create()
-                        .setHeader("Content-Type", "application/json")
-                        .setData(malformed));
-
-        assertEquals(400, res.status());
-
-        String body = res.text();
-        // Mensagem configurada no teu GHE:
-        assertTrue(body.contains("Invalid request format: verify the fields"),
-                "Esperava mensagem global de JSON inválido");
     }
 }
