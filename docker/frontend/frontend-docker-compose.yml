@@ -2,7 +2,7 @@ services:
   doctorapp-web:
     build:
       context: ./frontend-fe
-      dockerfile: Dockerfile
+      dockerfile: ../Dockerfile
       args:
         - NODE_VERSION=20
     image: doctorapp/web:latest
