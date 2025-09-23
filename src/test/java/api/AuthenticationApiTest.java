@@ -25,6 +25,11 @@ public class AuthenticationApiTest extends BaseApiTest {
         public String role;
     }
 
+    static class LoginRequestPayload {
+        public String login;
+        public String password;
+    }
+
     private RegisterRequestPayload invalidPayload(String email) {
         RegisterRequestPayload p = new RegisterRequestPayload();
         p.firstName = "Malaquias";
@@ -47,6 +52,13 @@ public class AuthenticationApiTest extends BaseApiTest {
         p.birthdate = "2001-10-08";
         p.role = "USER";
         return p;
+    }
+
+    private LoginRequestPayload validLogin(String email) {
+        LoginRequestPayload login = new LoginRequestPayload();
+        login.login = "r9@example.com";
+        login.password = "nextJob!";
+        return login;
     }
 
     @Test
@@ -116,5 +128,20 @@ public class AuthenticationApiTest extends BaseApiTest {
                 .then()
                 .statusCode(400)
                 .body(containsString("Password must contain at least one uppercase letter and one special character"));
+    }
+
+    @Test
+    void login_whenCredentialsExists_shouldReturn200() {
+        String email = "r9@example.com";
+        String password = "nextJob!";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(validLogin(email))
+                .body(validLogin(password))
+                .when()
+                .body("/auth/login")
+                .then()
+                .statusCode(200);
     }
 }

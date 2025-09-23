@@ -42,7 +42,7 @@ public class LoginTest {
         page.navigate(FE_URL + "/login");
 
         page.locator("input[name='email']").fill("r9@example.com");
-        page.locator("input[name='password']").fill("123456");
+        page.locator("input[name='password']").fill("nextJob!");
 
         page.click("button[type=submit]");
         page.waitForURL("**/app");
