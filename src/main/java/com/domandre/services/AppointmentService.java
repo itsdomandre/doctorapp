@@ -60,14 +60,6 @@ public class AppointmentService {
         return appointmentRepository.findAll(PageRequest.of(page, size, Sort.by("appointmentDate").descending()));
     }
 
-    public List<Appointment> getAppointmentsByUser() {
-        User currentUser = userService.getCurrentUser();
-        System.out.println("Fetching appointments for user: " + currentUser.getEmail());
-        List<Appointment> appointments = appointmentRepository.findByPatient(currentUser);
-        System.out.println("Found appointments: " + appointments.size());
-        return appointments;
-    }
-
     public Appointment getOrThrow(Long id) throws ResourceNotFoundException {
         return appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
@@ -84,7 +76,7 @@ public class AppointmentService {
             if (doctorId == null) {
                 throw new AdminMustBeProvidedException();
             }
-            User doctor = userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found."));
+            User doctor = userRepository.findById(doctorId).orElseThrow(ResourceNotFoundException::new);
             if (doctor.getRole() != Role.ADMIN) {
                 throw new InsufficientPermissionsException();
             }

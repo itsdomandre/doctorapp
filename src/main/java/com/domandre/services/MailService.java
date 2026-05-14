@@ -1,5 +1,6 @@
 package com.domandre.services;
 
+import com.domandre.exceptions.EmailIntegrationErrorException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,9 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${mail.confirmation.sender}")
+    private String sender;
+
     @Value("${app.backend.url}")
     private String backendUrl;
 
@@ -24,7 +28,7 @@ public class MailService {
         return (frontendUrl != null && !frontendUrl.isBlank()) ? frontendUrl : backendUrl;
     }
 
-    public void sendActivationEmail(String to, String token) {
+    public void sendActivationEmail(String to, String token) throws EmailIntegrationErrorException {
         String link;
         if (frontendUrl == null || frontendUrl.isBlank()) {
             link = backendUrl + "/api/auth/activate?token=" + token;
@@ -41,7 +45,7 @@ public class MailService {
         );
     }
 
-    public void sendResetEmailPassword(String to, String token) {
+    public void sendResetEmailPassword(String to, String token) throws EmailIntegrationErrorException {
         String link;
         if (frontendUrl == null || frontendUrl.isBlank()) {
             link = backendUrl + "/api/auth/reset-password?token=" + token;
@@ -58,7 +62,7 @@ public class MailService {
         );
     }
 
-    public void sendWelcomeEmail(String to, String firstName) {
+    public void sendWelcomeEmail(String to, String firstName) throws EmailIntegrationErrorException {
         sendEmail(
                 to,
                 "Welcome to DoctorApp 🎉",
@@ -71,16 +75,17 @@ public class MailService {
         );
     }
 
-    public void sendEmail(String to, String subject, String html) {
+    public void sendEmail(String to, String subject, String html) throws EmailIntegrationErrorException {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(sender);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(html, true);
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email", e);
+            throw new EmailIntegrationErrorException();
         }
     }
 }

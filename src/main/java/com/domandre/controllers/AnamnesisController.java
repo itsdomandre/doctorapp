@@ -34,7 +34,6 @@ public class AnamnesisController {
     private final AnamnesisService anamnesisService;
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AnamnesisDTO>> getByPatient(@PathVariable UUID patientId) {
         List<Anamnesis> anamnesis = anamnesisService.getAnamnesesByPatient(patientId);
         List<AnamnesisDTO> dtoList = anamnesis.stream()
@@ -44,7 +43,6 @@ public class AnamnesisController {
     }
 
     @PostMapping("/patient/{patientId}/appointment/{appointmentId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> createAnamnesis(@PathVariable UUID patientId, @PathVariable Long appointmentId, @Valid @RequestBody AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
         log.info("Creating new anamnesis for patient ID: {}", patientId);
         Anamnesis created = anamnesisService.createAnamnesis(patientId, appointmentId, request);
@@ -53,17 +51,15 @@ public class AnamnesisController {
     }
 
     @PatchMapping("/appointment/{appointmentId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> updateAnamnesisByAppointment(@PathVariable Long appointmentId, @RequestBody @Valid AnamnesisRequest request
     ) throws ResourceNotFoundException {
         log.info("Updating anamnesis for appointment ID: {}", appointmentId);
         Anamnesis updated = anamnesisService.updateByAppointmentId(appointmentId, request);
         log.info("Anamnesis updated successfully. ID: {}", updated.getId());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(AnamnesisMapper.toDTO(updated));
     }
 
     @GetMapping("/patient/{patientId}/last")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> getLastByPatient(@PathVariable UUID patientId) {
         Anamnesis lastAnamnesis = anamnesisService.getLastByPatient(patientId);
         if (lastAnamnesis == null) {
@@ -73,7 +69,6 @@ public class AnamnesisController {
     }
 
     @GetMapping("/patient/{patientId}/appointment/{appointmentId}/template")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AnamnesisDTO> getAnamnesisTemplate(@PathVariable UUID patientId, @PathVariable long appointmentId) throws ResourceNotFoundException, AppointmentNotAprovedException {
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
@@ -88,7 +83,6 @@ public class AnamnesisController {
     }
 
     @GetMapping("/patient/{patientId}/history")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AnamnesisDTO>> getAnamnesisHistory(@PathVariable UUID patientId, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
         List<Anamnesis> anamneses = anamnesisService.getAnamnesesByPatient(patientId);
         List<AnamnesisDTO> dtos = new ArrayList<>();
@@ -97,7 +91,7 @@ public class AnamnesisController {
             if (a.getCreatedAt() == null) continue;
             LocalDate createdDate = a.getCreatedAt().toLocalDate();
             if (startDate != null && createdDate.isBefore(startDate)) continue;
-            if (endDate != null && createdDate.isAfter(startDate)) continue;
+            if (endDate != null && createdDate.isAfter(endDate)) continue;
             dtos.add(AnamnesisMapper.toDTO(a));
         }
         return ResponseEntity.ok(dtos);

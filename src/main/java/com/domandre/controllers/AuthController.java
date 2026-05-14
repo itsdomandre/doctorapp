@@ -6,6 +6,8 @@ import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
 import com.domandre.exceptions.AccountNotVerifiedException;
+import com.domandre.exceptions.EmailIntegrationErrorException;
+import com.domandre.exceptions.InvalidTokenException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
@@ -44,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) throws UserAlreadyExistsException {
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) throws UserAlreadyExistsException, EmailIntegrationErrorException {
         log.info("Registration attempt for new user: {}", request.getEmail());
         User user = authService.register(request);
         log.info("Registration completed for user: {}", request.getEmail());
@@ -69,7 +71,7 @@ public class AuthController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) {
+    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) throws InvalidTokenException, EmailIntegrationErrorException {
         authService.activateAccount(token);
         return ResponseEntity.ok().build();
     }
@@ -83,7 +85,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @Valid @RequestBody ResetPasswordRequest body) {
+            @Valid @RequestBody ResetPasswordRequest body) throws InvalidTokenException {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Missing Authorization: Bearer <token>");
         }

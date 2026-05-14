@@ -4,9 +4,11 @@ import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.InvalidToken;
 import com.domandre.entities.User;
-import com.domandre.enums.Role;
 import com.domandre.enums.UserStatus;
 import com.domandre.exceptions.AccountNotVerifiedException;
+import com.domandre.exceptions.EmailIntegrationErrorException;
+import com.domandre.exceptions.InvalidTokenException;
+import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
@@ -37,7 +39,7 @@ public class AuthService {
     @Value("${auth.activation.expiration-ms:86400000}")
     private long activationTokenTtlMs;
 
-    public User register(RegisterRequest request) throws UserAlreadyExistsException {
+    public User register(RegisterRequest request) throws UserAlreadyExistsException, EmailIntegrationErrorException {
         log.info("Verifying if the user exists...");
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException();
@@ -49,12 +51,11 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setBirthdate(request.getBirthdate());
-        Role role = request.getRole() != null ? request.getRole() : Role.USER;
-        user.setRole(role);
+        user.setRole(Role.USER);
         user.setStatus(UserStatus.UNVERIFIED);
 
         userRepository.save(user);
-        String activationToken = jwtService.generateTokenToActivatonOrReset(user.getEmail(), 86400000, "activation");
+        String activationToken = jwtService.generateTokenToActivatonOrReset(user.getEmail(), activationTokenTtlMs, "activation");
         mailService.sendActivationEmail(user.getEmail(), activationToken);
         log.info("User {} registered as PENDING and activation email sent.", user.getEmail());
         if (logTokens) {
@@ -72,7 +73,7 @@ public class AuthService {
                 )
         );
 
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(RuntimeException::new);
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(ResourceNotFoundException::new);
 
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new AccountNotVerifiedException();
@@ -84,19 +85,17 @@ public class AuthService {
         return jwt;
     }
 
-    public void activateAccount(String token) {
+    public void activateAccount(String token) throws InvalidTokenException, EmailIntegrationErrorException {
         if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))) {
-            throw new RuntimeException("Invalid activation token");
+            throw new InvalidTokenException();
         }
 
         String email = jwtService.getUsernameFromJWT(token);
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
-        if (user.getStatus().equals(UserStatus.ACTIVE)) {
-            mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
-            log.info("[DEV] Account activated : {}", email);
-        }
+        mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+        log.info("Account activated: {}", email);
     }
 
     public void sendPasswordResetToken(String email) {
@@ -106,12 +105,12 @@ public class AuthService {
         });
     }
 
-    public void resetPassword(String token, String newPassword) {
+    public void resetPassword(String token, String newPassword) throws InvalidTokenException {
         if (!jwtService.validateToken(token) || !"password_reset".equals(jwtService.getTypeFromJWT(token))) {
-            throw new RuntimeException("Invalid password reset token");
+            throw new InvalidTokenException();
         }
         String email = jwtService.getUsernameFromJWT(token);
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
