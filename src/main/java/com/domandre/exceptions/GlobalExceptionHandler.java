@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientPermissionsException.class)
     public ResponseEntity<String> handleInsufficientPermissionsException(InsufficientPermissionsException ex) {
-        return new ResponseEntity<>("Insufficient Permissions, please check again", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("Insufficient Permissions, please check again", HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

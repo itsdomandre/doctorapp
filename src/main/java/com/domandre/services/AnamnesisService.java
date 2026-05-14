@@ -64,6 +64,7 @@ public class AnamnesisService {
         return createdAnamnesis;
     }
 
+    @Transactional
     public Anamnesis updateByAppointmentId(Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException {
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         Anamnesis anamnesis = appointment.getAnamnesis();

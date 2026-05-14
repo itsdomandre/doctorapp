@@ -13,6 +13,7 @@ import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;
 import com.domandre.repositories.AppointmentRepository;
+import com.domandre.validators.AppointmentValidator;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,11 @@ public class AppointmentService {
     private final UserService userService;
 
     public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
+        if (!AppointmentValidator.isValidAppointment(request.getDateTime())) {
+            throw new DateTimeRequestIsNotPermittedException();
+        }
         User patient = userService.getCurrentUser();
-        boolean existsAppointment = appointmentRepository.existsByAppointmentDate(request.getDateTime());
-        if (existsAppointment) {
+        if (appointmentRepository.existsByAppointmentDate(request.getDateTime())) {
             throw new DateTimeRequestIsNotPermittedException();
         }
         Appointment appointment = Appointment.builder().

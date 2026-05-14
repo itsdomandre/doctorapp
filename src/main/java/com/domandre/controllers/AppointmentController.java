@@ -10,7 +10,6 @@ import com.domandre.exceptions.*;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
-import com.domandre.validators.AppointmentValidator;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +38,6 @@ public class AppointmentController {
     @PostMapping("/create")
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {
         log.info("Creating appointment for date: {}", request.getDateTime());
-        LocalDateTime requestTimeToAppointment = request.getDateTime();
-        if (!AppointmentValidator.isValidAppointment(requestTimeToAppointment)) {
-            throw new DateTimeRequestIsNotPermittedException();
-        }
-
         Appointment appointment = appointmentService.createAppointment(request);
         log.info("Appointment created successfully for date: {}", request.getDateTime());
         return ResponseEntity.ok(AppointmentMapper.toDTO(appointment));

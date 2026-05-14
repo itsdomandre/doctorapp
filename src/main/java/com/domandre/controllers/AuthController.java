@@ -55,7 +55,7 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) throws AccountNotVerifiedException {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
-        log.info("Login successful for user: {}", loginRequest.getEmail() + token);
+        log.info("Login successful for user: {}", loginRequest.getEmail());
         ResponseCookie jwtCookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .secure(appCookieSecure)
