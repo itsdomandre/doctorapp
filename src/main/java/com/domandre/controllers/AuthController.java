@@ -5,7 +5,7 @@ import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
-import com.domandre.exceptions.InvalidTokenException;
+import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) throws InvalidTokenException {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) throws AccountNotVerifiedException {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
         log.info("Login successful for user: {}", loginRequest.getEmail() + token);
@@ -63,7 +63,7 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
-    @PostMapping("/activate")
+    @GetMapping("/activate")
     public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) {
         authService.activateAccount(token);
         return ResponseEntity.ok().build();

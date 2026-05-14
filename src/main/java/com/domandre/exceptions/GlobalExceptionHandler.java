@@ -95,4 +95,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Invalid activation token", HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(AccountNotVerifiedException.class)
+    public ResponseEntity<String> handleAccountNotVerifiedException(AccountNotVerifiedException ex) {
+        return new ResponseEntity<>("Account not verified. Please check your email to activate your account.", HttpStatus.FORBIDDEN);
+    }
+
 }

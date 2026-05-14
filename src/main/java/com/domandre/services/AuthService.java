@@ -5,7 +5,7 @@ import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.User;
 import com.domandre.enums.Role;
 import com.domandre.enums.UserStatus;
-import com.domandre.exceptions.InvalidTokenException;
+import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +61,7 @@ public class AuthService {
         return user;
     }
 
-    public String login(LoginRequest loginRequest) throws BadCredentialsException, InvalidTokenException {
+    public String login(LoginRequest loginRequest) throws BadCredentialsException, AccountNotVerifiedException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -72,13 +72,13 @@ public class AuthService {
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(RuntimeException::new);
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new InvalidTokenException();
+            throw new AccountNotVerifiedException();
         }
         String jwt = jwtService.generateToken(authentication);
         if (logTokens) {
             log.info("[DEV] Access JWT for {}: {}", user.getEmail(), jwt);
         }
-        return jwtService.generateToken(authentication);
+        return jwt;
     }
 
     public void activateAccount(String token) {
@@ -117,7 +117,7 @@ public class AuthService {
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.getStatus() == UserStatus.UNVERIFIED) {
                 String token = jwtService.generateTokenToActivatonOrReset(email, activationTokenTtlMs, "activation");
-                // mailService.sendActivationEmail(email, token);
+                mailService.sendActivationEmail(email, token);
 
                 if (logTokens) {
                     log.info("[DEV] Activate via backend: /api/auth/activate?token={}", token);
