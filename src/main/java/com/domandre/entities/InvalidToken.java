@@ -15,6 +15,6 @@ import java.util.Date;
 public class InvalidToken {
     @Id
     private String token;
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date expiration;
 }

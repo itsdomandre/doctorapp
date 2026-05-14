@@ -9,7 +9,9 @@ import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
+import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 public class AuthController {
     private final AuthService authService;
+    private final JwtService jwtService;
 
     @Value("${app.cookie.secure:false}")
     private boolean appCookieSecure;
@@ -100,7 +103,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        String jwt = jwtService.resolveToken(request);
+        if (jwt != null) {
+            authService.logout(jwt);
+        }
         ResponseCookie deleteCookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
                 .secure(appCookieSecure)

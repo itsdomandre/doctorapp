@@ -2,11 +2,13 @@ package com.domandre.services;
 
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
+import com.domandre.entities.InvalidToken;
 import com.domandre.entities.User;
 import com.domandre.enums.Role;
 import com.domandre.enums.UserStatus;
 import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.UserAlreadyExistsException;
+import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final InvalidTokenRepository invalidTokenRepository;
 
     @Value("${app.log.tokens:false}")
     private boolean logTokens;
@@ -111,6 +114,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public void logout(String jwt) {
+        invalidTokenRepository.save(new InvalidToken(jwt, jwtService.getExpirationFromJWT(jwt)));
     }
 
     public void resendActivation(String email) {
