@@ -6,7 +6,6 @@ import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.exceptions.AppointmentNotAprovedException;
-import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.services.AnamnesisService;
 import com.domandre.services.AppointmentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,7 @@ public class AnamnesisControllerTest {
     }
 
     @Test
-    void getTemplateLastAnamnesis_whenLastExists_shouldReturnDto() throws ResourceNotFoundException, AppointmentNotAprovedException {
+    void getTemplateLastAnamnesis_whenLastExists_shouldReturnDto() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.APPROVED);
         when(appointmentService.getOrThrow(appointmentId)).thenReturn(appointment);
@@ -64,7 +63,7 @@ public class AnamnesisControllerTest {
     }
 
     @Test
-    void getAnamnesisTemplate_whenNotApproved_shouldThrowException() throws ResourceNotFoundException {
+    void getAnamnesisTemplate_whenNotApproved_shouldThrowException() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.REQUESTED);
         when(appointmentService.getOrThrow(appointmentId)).thenReturn(appointment);

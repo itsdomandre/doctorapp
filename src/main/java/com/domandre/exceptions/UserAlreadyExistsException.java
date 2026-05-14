@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class UserAlreadyExistsException extends Throwable {
+public class UserAlreadyExistsException extends RuntimeException {
 }

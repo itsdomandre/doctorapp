@@ -28,7 +28,7 @@ class AnamnesisServiceTest {
     }
 
     @Test
-    void updateByAppointmentId_shouldUpdateFieldsAndSave() throws ResourceNotFoundException {
+    void updateByAppointmentId_shouldUpdateFieldsAndSave() {
         Long appointmentId = 1L;
 
         AnamnesisRequest request = new AnamnesisRequest();
@@ -51,7 +51,7 @@ class AnamnesisServiceTest {
     }
 
     @Test
-    void updateByAppointmentId_shouldThrowExceptionWhenAnamnesisIsNull() throws ResourceNotFoundException {
+    void updateByAppointmentId_shouldThrowExceptionWhenAnamnesisIsNull() {
         Long appointmentId = 1L;
         AnamnesisRequest request = new AnamnesisRequest();
         Appointment appointment = new Appointment();

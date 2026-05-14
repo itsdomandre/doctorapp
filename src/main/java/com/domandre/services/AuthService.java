@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +38,7 @@ public class AuthService {
     @Value("${auth.activation.expiration-ms:86400000}")
     private long activationTokenTtlMs;
 
-    public User register(RegisterRequest request) throws UserAlreadyExistsException, EmailIntegrationErrorException {
+    public User register(RegisterRequest request) {
         log.info("Verifying if the user exists...");
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException();
@@ -64,7 +63,7 @@ public class AuthService {
         return user;
     }
 
-    public String login(LoginRequest loginRequest) throws BadCredentialsException, AccountNotVerifiedException {
+    public String login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -84,7 +83,7 @@ public class AuthService {
         return jwt;
     }
 
-    public void activateAccount(String token) throws InvalidTokenException, EmailIntegrationErrorException {
+    public void activateAccount(String token) {
         if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))) {
             throw new InvalidTokenException();
         }
@@ -97,14 +96,14 @@ public class AuthService {
         log.info("Account activated: {}", email);
     }
 
-    public void sendPasswordResetToken(String email) throws EmailIntegrationErrorException {
+    public void sendPasswordResetToken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
             String newToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
             mailService.sendResetEmailPassword(email, newToken);
         }
     }
 
-    public void resetPassword(String token, String newPassword) throws InvalidTokenException {
+    public void resetPassword(String token, String newPassword) {
         if (!jwtService.validateToken(token) || !"password_reset".equals(jwtService.getTypeFromJWT(token))) {
             throw new InvalidTokenException();
         }
@@ -118,7 +117,7 @@ public class AuthService {
         invalidTokenRepository.save(new InvalidToken(jwt, jwtService.getExpirationFromJWT(jwt)));
     }
 
-    public void resendActivation(String email) throws EmailIntegrationErrorException {
+    public void resendActivation(String email) {
         java.util.Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) return;
         User user = userOpt.get();

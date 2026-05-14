@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class DateTimeRequestIsNotPermittedException extends Throwable {
+public class DateTimeRequestIsNotPermittedException extends RuntimeException {
 }

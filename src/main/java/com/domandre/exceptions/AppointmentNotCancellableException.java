@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class AppointmentNotCancellableException extends Throwable {
+public class AppointmentNotCancellableException extends RuntimeException {
 }

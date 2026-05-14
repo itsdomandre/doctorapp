@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class ResourceNotFoundException extends Throwable {
+public class ResourceNotFoundException extends RuntimeException {
 }

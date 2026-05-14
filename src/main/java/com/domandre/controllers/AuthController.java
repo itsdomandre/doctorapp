@@ -5,10 +5,6 @@ import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
-import com.domandre.exceptions.AccountNotVerifiedException;
-import com.domandre.exceptions.EmailIntegrationErrorException;
-import com.domandre.exceptions.InvalidTokenException;
-import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
@@ -46,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) throws UserAlreadyExistsException, EmailIntegrationErrorException {
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Registration attempt for new user: {}", request.getEmail());
         User user = authService.register(request);
         log.info("Registration completed for user: {}", request.getEmail());
@@ -54,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) throws AccountNotVerifiedException {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         log.info("Login attempt for user: {}", loginRequest.getEmail());
         String token = authService.login(loginRequest);
         log.info("Login successful for user: {}", loginRequest.getEmail());
@@ -71,13 +67,13 @@ public class AuthController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) throws InvalidTokenException, EmailIntegrationErrorException {
+    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) {
         authService.activateAccount(token);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestParam String email) throws EmailIntegrationErrorException {
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         authService.sendPasswordResetToken(email);
         return ResponseEntity.ok("If the email exists, a reset link was sent");
     }
@@ -85,7 +81,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @Valid @RequestBody ResetPasswordRequest body) throws InvalidTokenException {
+            @Valid @RequestBody ResetPasswordRequest body) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Missing Authorization: Bearer <token>");
         }
@@ -101,7 +97,7 @@ public class AuthController {
     }
 
     @PostMapping("/resend-activation")
-    public ResponseEntity<String> resendActivation(@RequestParam String email) throws EmailIntegrationErrorException {
+    public ResponseEntity<String> resendActivation(@RequestParam String email) {
         authService.resendActivation(email);
         return ResponseEntity.ok("If the account exists and is pending, an activation email was resent");
     }

@@ -28,7 +28,7 @@ public class MailService {
         return (frontendUrl != null && !frontendUrl.isBlank()) ? frontendUrl : backendUrl;
     }
 
-    public void sendActivationEmail(String to, String token) throws EmailIntegrationErrorException {
+    public void sendActivationEmail(String to, String token) {
         String link;
         if (frontendUrl == null || frontendUrl.isBlank()) {
             link = backendUrl + "/api/auth/activate?token=" + token;
@@ -45,7 +45,7 @@ public class MailService {
         );
     }
 
-    public void sendResetEmailPassword(String to, String token) throws EmailIntegrationErrorException {
+    public void sendResetEmailPassword(String to, String token) {
         String link;
         if (frontendUrl == null || frontendUrl.isBlank()) {
             link = backendUrl + "/api/auth/reset-password?token=" + token;
@@ -62,7 +62,7 @@ public class MailService {
         );
     }
 
-    public void sendWelcomeEmail(String to, String firstName) throws EmailIntegrationErrorException {
+    public void sendWelcomeEmail(String to, String firstName) {
         sendEmail(
                 to,
                 "Welcome to DoctorApp 🎉",
@@ -75,7 +75,7 @@ public class MailService {
         );
     }
 
-    public void sendEmail(String to, String subject, String html) throws EmailIntegrationErrorException {
+    public void sendEmail(String to, String subject, String html) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);

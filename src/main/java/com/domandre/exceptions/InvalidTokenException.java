@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class InvalidTokenException extends Throwable {
+public class InvalidTokenException extends RuntimeException {
 }

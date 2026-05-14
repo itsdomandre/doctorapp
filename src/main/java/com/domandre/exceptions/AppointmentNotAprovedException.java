@@ -1,4 +1,4 @@
 package com.domandre.exceptions;
 
-public class AppointmentNotAprovedException extends Throwable {
+public class AppointmentNotAprovedException extends RuntimeException {
 }

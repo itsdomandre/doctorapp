@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,7 @@ public class AppointmentController {
     private final UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {
+    public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) {
         log.info("Creating appointment for date: {}", request.getDateTime());
         Appointment appointment = appointmentService.createAppointment(request);
         log.info("Appointment created successfully for date: {}", request.getDateTime());
@@ -65,7 +64,7 @@ public class AppointmentController {
 
     @PutMapping("/update/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateStatusRequest request) throws AdminMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateStatusRequest request) {
         log.info("Updating appointment status: ID={} | Status={} | Doctor={}", id, request.getStatus(), request.getDoctorId());
         Appointment updated = appointmentService.updateAppointmentStatus(id, request.getStatus(), request.getDoctorId());
         log.info("Appointment status updated successfully. ID={}", updated.getId());
@@ -108,7 +107,7 @@ public class AppointmentController {
 
     @PutMapping("/{id}/cancel")
     public ResponseEntity<AppointmentDTO> cancelAppointment(@PathVariable Long id)
-            throws ResourceNotFoundException, InsufficientPermissionsException, AppointmentNotCancellableException {
+    {
         log.info("Cancelling appointment ID={}", id);
         Appointment cancelled = appointmentService.cancelAppointment(id);
         log.info("Appointment ID={} cancelled successfully", id);

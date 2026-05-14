@@ -5,9 +5,7 @@ import com.domandre.controllers.response.AnamnesisDTO;
 import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.enums.AppointmentStatus;
-import com.domandre.exceptions.AnamnesisAlreadyExistsException;
 import com.domandre.exceptions.AppointmentNotAprovedException;
-import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.services.AnamnesisService;
 import com.domandre.services.AppointmentService;
@@ -43,7 +41,7 @@ public class AnamnesisController {
     }
 
     @PostMapping("/patient/{patientId}/appointment/{appointmentId}")
-    public ResponseEntity<AnamnesisDTO> createAnamnesis(@PathVariable UUID patientId, @PathVariable Long appointmentId, @Valid @RequestBody AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
+    public ResponseEntity<AnamnesisDTO> createAnamnesis(@PathVariable UUID patientId, @PathVariable Long appointmentId, @Valid @RequestBody AnamnesisRequest request) {
         log.info("Creating new anamnesis for patient ID: {}", patientId);
         Anamnesis created = anamnesisService.createAnamnesis(patientId, appointmentId, request);
         log.info("Anamnesis created with ID: {}", created.getId());
@@ -52,7 +50,7 @@ public class AnamnesisController {
 
     @PatchMapping("/appointment/{appointmentId}")
     public ResponseEntity<AnamnesisDTO> updateAnamnesisByAppointment(@PathVariable Long appointmentId, @RequestBody @Valid AnamnesisRequest request
-    ) throws ResourceNotFoundException {
+    ) {
         log.info("Updating anamnesis for appointment ID: {}", appointmentId);
         Anamnesis updated = anamnesisService.updateByAppointmentId(appointmentId, request);
         log.info("Anamnesis updated successfully. ID: {}", updated.getId());
@@ -69,7 +67,7 @@ public class AnamnesisController {
     }
 
     @GetMapping("/patient/{patientId}/appointment/{appointmentId}/template")
-    public ResponseEntity<AnamnesisDTO> getAnamnesisTemplate(@PathVariable UUID patientId, @PathVariable long appointmentId) throws ResourceNotFoundException, AppointmentNotAprovedException {
+    public ResponseEntity<AnamnesisDTO> getAnamnesisTemplate(@PathVariable UUID patientId, @PathVariable long appointmentId) {
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
             log.warn("Tentativa de template de Anamnesis em appointment não aprovado. ID={}", appointmentId);
