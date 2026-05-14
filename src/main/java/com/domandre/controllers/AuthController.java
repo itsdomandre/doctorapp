@@ -77,7 +77,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) throws EmailIntegrationErrorException {
         authService.sendPasswordResetToken(email);
         return ResponseEntity.ok("If the email exists, a reset link was sent");
     }
@@ -101,7 +101,7 @@ public class AuthController {
     }
 
     @PostMapping("/resend-activation")
-    public ResponseEntity<String> resendActivation(@RequestParam String email) {
+    public ResponseEntity<String> resendActivation(@RequestParam String email) throws EmailIntegrationErrorException {
         authService.resendActivation(email);
         return ResponseEntity.ok("If the account exists and is pending, an activation email was resent");
     }

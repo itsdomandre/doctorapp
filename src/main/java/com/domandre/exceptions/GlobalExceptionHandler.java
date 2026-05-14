@@ -51,11 +51,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Requested Date/Time is not available", HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @ExceptionHandler(NoAppointmentsTodayException.class)
-    public ResponseEntity<String> handleNoAppointmentsException(NoAppointmentsTodayException ex) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @ExceptionHandler(AppointmentNotAprovedException.class)
     public ResponseEntity<String> handleAppointmentNotApprovedException(AppointmentNotAprovedException ex) {
         return new ResponseEntity<>("Anamnesis can only created for approved appointment", HttpStatus.BAD_REQUEST);

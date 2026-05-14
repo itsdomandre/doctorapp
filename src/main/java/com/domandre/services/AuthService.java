@@ -59,7 +59,6 @@ public class AuthService {
         mailService.sendActivationEmail(user.getEmail(), activationToken);
         log.info("User {} registered as PENDING and activation email sent.", user.getEmail());
         if (logTokens) {
-            // log.info("[DEV] Activation token for {}: {}", user.getEmail(), activationToken);
             log.info("[DEV] Activate via backend: /api/auth/activate?token={}", activationToken);
         }
         return user;
@@ -98,11 +97,11 @@ public class AuthService {
         log.info("Account activated: {}", email);
     }
 
-    public void sendPasswordResetToken(String email) {
-        userRepository.findByEmail(email).ifPresent(user -> {
+    public void sendPasswordResetToken(String email) throws EmailIntegrationErrorException {
+        if (userRepository.findByEmail(email).isPresent()) {
             String newToken = jwtService.generateTokenToActivatonOrReset(email, 900000, "password_reset");
             mailService.sendResetEmailPassword(email, newToken);
-        });
+        }
     }
 
     public void resetPassword(String token, String newPassword) throws InvalidTokenException {
@@ -119,19 +118,19 @@ public class AuthService {
         invalidTokenRepository.save(new InvalidToken(jwt, jwtService.getExpirationFromJWT(jwt)));
     }
 
-    public void resendActivation(String email) {
-        userRepository.findByEmail(email).ifPresent(user -> {
-            if (user.getStatus() == UserStatus.UNVERIFIED) {
-                String token = jwtService.generateTokenToActivatonOrReset(email, activationTokenTtlMs, "activation");
-                mailService.sendActivationEmail(email, token);
-
-                if (logTokens) {
-                    log.info("[DEV] Activate via backend: /api/auth/activate?token={}", token);
-                }
-            } else {
-                log.info("Resend activation called for {} but status is {}", email, user.getStatus());
+    public void resendActivation(String email) throws EmailIntegrationErrorException {
+        java.util.Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) return;
+        User user = userOpt.get();
+        if (user.getStatus() == UserStatus.UNVERIFIED) {
+            String token = jwtService.generateTokenToActivatonOrReset(email, activationTokenTtlMs, "activation");
+            mailService.sendActivationEmail(email, token);
+            if (logTokens) {
+                log.info("[DEV] Activate via backend: /api/auth/activate?token={}", token);
             }
-        });
+        } else {
+            log.info("Resend activation called for {} but status is {}", email, user.getStatus());
+        }
     }
 }
 
