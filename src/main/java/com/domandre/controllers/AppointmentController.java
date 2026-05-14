@@ -35,6 +35,7 @@ import java.util.List;
 
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final UserService userService;
 
     @PostMapping("/create")
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) throws HttpMessageNotReadableException, DateTimeRequestIsNotPermittedException {
@@ -51,7 +52,7 @@ public class AppointmentController {
 
     @GetMapping("/my-appointments")
     public ResponseEntity<List<AppointmentDTO>> getMyAppointments() {
-        User currentUser = UserService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         List<Appointment> appointments = appointmentService.getAppointmentsForCurrentUser(currentUser);
         log.info("Found {} appointments for user: {}", appointments.size(), currentUser.getEmail());
         List<AppointmentDTO> dto = appointments.stream()

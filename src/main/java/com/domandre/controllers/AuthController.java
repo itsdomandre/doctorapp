@@ -11,6 +11,7 @@ import com.domandre.mappers.UserMapper;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
+    private final UserService userService;
 
     @Value("${app.cookie.secure:false}")
     private boolean appCookieSecure;
@@ -37,7 +39,7 @@ public class AuthController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated")
     public ResponseEntity<UserDTO> getLoggedUser() {
-        User user = UserService.getCurrentUser();
+        User user = userService.getCurrentUser();
         return ResponseEntity.ok(UserMapper.toDTO(user));
     }
 

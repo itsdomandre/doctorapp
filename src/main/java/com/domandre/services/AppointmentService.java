@@ -31,9 +31,10 @@ import java.util.stream.Collectors;
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
-        User patient = UserService.getCurrentUser();
+        User patient = userService.getCurrentUser();
         boolean existsAppointment = appointmentRepository.existsByAppointmentDate(request.getDateTime());
         if (existsAppointment) {
             throw new DateTimeRequestIsNotPermittedException();
@@ -53,7 +54,7 @@ public class AppointmentService {
     }
 
     public List<Appointment> getAppointmentsByUser() {
-        User currentUser = UserService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         System.out.println("Fetching appointments for user: " + currentUser.getEmail());
         List<Appointment> appointments = appointmentRepository.findByPatient(currentUser);
         System.out.println("Found appointments: " + appointments.size());
