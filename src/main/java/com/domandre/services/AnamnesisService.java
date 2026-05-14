@@ -14,6 +14,7 @@ import com.domandre.repositories.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,7 @@ public class AnamnesisService {
         return repository.findTopByPatientIdOrderByCreatedAtDesc(patientId);
     }
 
+    @Transactional
     public Anamnesis createAnamnesis(UUID patientId, Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
         User patient = userService.getUserById(patientId);
         LocalDateTime now = LocalDateTime.now();
