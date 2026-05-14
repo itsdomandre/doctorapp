@@ -7,6 +7,7 @@ import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.exceptions.*;
+import org.springframework.data.domain.Page;
 import com.domandre.mappers.AppointmentMapper;
 import com.domandre.services.AppointmentService;
 import com.domandre.services.UserService;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -56,13 +56,11 @@ public class AppointmentController {
 
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getAllAppointments() {
-        log.info("Fetching all appointments (ADMIN access)");
-        List<Appointment> appointments = appointmentService.getAllAppointments();
-        List<AppointmentDTO> dto = appointments.stream()
-                .map(AppointmentMapper::toDTO)
-                .toList();
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<Page<AppointmentDTO>> getAllAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Fetching all appointments (ADMIN access), page={}, size={}", page, size);
+        return ResponseEntity.ok(appointmentService.getAllAppointments(page, size).map(AppointmentMapper::toDTO));
     }
 
     @PutMapping("/update/{id}/approve")
@@ -99,20 +97,22 @@ public class AppointmentController {
 
     @GetMapping("/today")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AppointmentDTO>> getTodayAppointments() throws NoAppointmentsTodayException {
-        log.info("Fetching today's appointments");
-        List<Appointment> result = appointmentService.getTodayAppointments();
+    public ResponseEntity<Page<AppointmentDTO>> getTodayAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Fetching today's appointments, page={}, size={}", page, size);
+        Page<AppointmentDTO> result = appointmentService.getTodayAppointments(page, size).map(AppointmentMapper::toDTO);
+        log.info("{} appointments found today", result.getTotalElements());
+        return ResponseEntity.ok(result);
+    }
 
-        List<AppointmentDTO> dtoList = new ArrayList<>();
-        for (Appointment appointment : result) {
-            dtoList.add(AppointmentMapper.toDTO(appointment));
-        }
-        if (result.isEmpty()) {
-            log.warn("No appointments found today");
-            throw new NoAppointmentsTodayException();
-        }
-        log.info("{} appointments found today", dtoList.size());
-        return ResponseEntity.ok(dtoList);
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<AppointmentDTO> cancelAppointment(@PathVariable Long id)
+            throws ResourceNotFoundException, InsufficientPermissionsException, AppointmentNotCancellableException {
+        log.info("Cancelling appointment ID={}", id);
+        Appointment cancelled = appointmentService.cancelAppointment(id);
+        log.info("Appointment ID={} cancelled successfully", id);
+        return ResponseEntity.ok(AppointmentMapper.toDTO(cancelled));
     }
 
     @GetMapping("/pending")

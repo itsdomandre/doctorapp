@@ -100,4 +100,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Account not verified. Please check your email to activate your account.", HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(AppointmentNotCancellableException.class)
+    public ResponseEntity<String> handleAppointmentNotCancellableException(AppointmentNotCancellableException ex) {
+        return new ResponseEntity<>("Appointment cannot be cancelled in its current status.", HttpStatus.CONFLICT);
+    }
+
 }

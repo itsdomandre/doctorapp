@@ -7,6 +7,7 @@ import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
 import com.domandre.exceptions.AdminMustBeProvidedException;
+import com.domandre.exceptions.AppointmentNotCancellableException;
 import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
 import com.domandre.exceptions.InsufficientPermissionsException;
 import com.domandre.exceptions.ResourceNotFoundException;
@@ -16,6 +17,9 @@ import com.domandre.repositories.AppointmentRepository;
 import com.domandre.validators.AppointmentValidator;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -52,8 +56,8 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    public List<Appointment> getAllAppointments() {
-        return appointmentRepository.findAll();
+    public Page<Appointment> getAllAppointments(int page, int size) {
+        return appointmentRepository.findAll(PageRequest.of(page, size, Sort.by("appointmentDate").descending()));
     }
 
     public List<Appointment> getAppointmentsByUser() {
@@ -127,11 +131,28 @@ public class AppointmentService {
         );
     }
 
-    public List<Appointment> getTodayAppointments() {
+    public Page<Appointment> getTodayAppointments(int page, int size) {
         LocalDate today = LocalDate.now();
-        LocalDateTime from = today.atStartOfDay();
-        LocalDateTime to = today.atTime(23, 59);
-        return appointmentRepository.findAllByAppointmentDateBetween(from, to);
+        return appointmentRepository.findAllByAppointmentDateBetween(
+                today.atStartOfDay(), today.atTime(23, 59),
+                PageRequest.of(page, size, Sort.by("appointmentDate").ascending())
+        );
+    }
+
+    public Appointment cancelAppointment(Long id) throws ResourceNotFoundException, InsufficientPermissionsException, AppointmentNotCancellableException {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        User currentUser = userService.getCurrentUser();
+        if (!appointment.getPatient().getId().equals(currentUser.getId())) {
+            throw new InsufficientPermissionsException();
+        }
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED
+                || appointment.getStatus() == AppointmentStatus.CANCELLED
+                || appointment.getStatus() == AppointmentStatus.REJECTED) {
+            throw new AppointmentNotCancellableException();
+        }
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setUpdatedAt(LocalDateTime.now());
+        return appointmentRepository.save(appointment);
     }
 
     public List<Appointment> getPendingAppointments() {
