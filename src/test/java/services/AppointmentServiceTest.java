@@ -1,9 +1,6 @@
 package services;
 
 import com.domandre.entities.Appointment;
-import com.domandre.helpers.BusinessHoursHelper;
-import com.domandre.helpers.BusinessHoursHelper.TimeRange;
-import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
 import com.domandre.services.AppointmentService;
@@ -26,18 +23,17 @@ public class AppointmentServiceTest {
     private AppointmentRepository appointmentRepository;
     private UserRepository userRepository;
     private UserService userService;
-    private AnamnesisRepository anamnesisRepository;
 
     @BeforeEach
     void setUp() {
         appointmentRepository = mock(AppointmentRepository.class);
         userRepository = mock(UserRepository.class);
         userService = mock(UserService.class);
-        anamnesisRepository = mock(AnamnesisRepository.class);
 
         appointmentService = new AppointmentService(
                 appointmentRepository,
-                userRepository
+                userRepository,
+                userService
         );
     }
 
@@ -54,7 +50,6 @@ public class AppointmentServiceTest {
         )).thenReturn(List.of(takenAppointment));
 
         List<LocalTime> availableSlots = appointmentService.getAvailableSlots(nextValidBusinessDay);
-        System.out.println("Available slots: " + availableSlots);
 
         assertFalse(availableSlots.contains(takenTime), "10:00 should NOT be available");
 

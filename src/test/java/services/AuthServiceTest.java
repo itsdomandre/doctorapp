@@ -3,8 +3,8 @@ package services;
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.User;
-import com.domandre.enums.Role;
-import com.domandre.exceptions.InvalidTokenException;
+import com.domandre.enums.UserStatus;
+import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.UserAlreadyExistsException;
 import com.domandre.repositories.InvalidTokenRepository;
 import com.domandre.repositories.UserRepository;
@@ -48,7 +48,7 @@ public class AuthServiceTest {
 
     @Test
     void register_whenEmailNotExists_shouldRegisterNewUser() throws UserAlreadyExistsException {
-        RegisterRequest request = new RegisterRequest("Ruud", "Van Nistelrooy", "ruud@example.com", "1234", "11991238863", LocalDate.of(2001, 10, 8), Role.USER);
+        RegisterRequest request = new RegisterRequest("Ruud", "Van Nistelrooy", "ruud@example.com", "1234", "11991238863", LocalDate.of(2001, 10, 8));
         given(userRepository.existsByEmail(request.getEmail())).willReturn(false);
         given(passwordEncoder.encode(request.getPassword())).willReturn("HashedPassword");
 
@@ -63,7 +63,7 @@ public class AuthServiceTest {
 
     @Test
     void register_whenEmailAlreadyExists_shouldThrowUserAlreadyExistsException() {
-        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", LocalDate.of(2000, 05, 12), Role.USER);
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password", "999999999", LocalDate.of(2000, 5, 12));
 
         given(userRepository.existsByEmail(request.getEmail())).willReturn(true);
 
@@ -71,11 +71,15 @@ public class AuthServiceTest {
     }
 
     @Test
-    void login_whenCredentialsAreCorrect_shouldReturnToken() throws InvalidTokenException {
+    void login_whenCredentialsAreCorrect_shouldReturnToken() throws AccountNotVerifiedException {
         LoginRequest loginRequest = new LoginRequest("john@example.com", "password");
         Authentication authentication = mock(Authentication.class);
 
+        User activeUser = new User();
+        activeUser.setStatus(UserStatus.ACTIVE);
+
         given(authenticationManager.authenticate(any())).willReturn(authentication);
+        given(userRepository.findByEmail(loginRequest.getEmail())).willReturn(java.util.Optional.of(activeUser));
         given(jwtService.generateToken(authentication)).willReturn("mockedToken");
 
         String token = authService.login(loginRequest);
