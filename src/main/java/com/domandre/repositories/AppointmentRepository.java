@@ -5,16 +5,35 @@ import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByPatient(User patient);
-    List<Appointment> findAllByAppointmentDateBetween(LocalDateTime from, LocalDateTime to);// DateBetween must be 2 arguments (from, to) JPA+DB characteristic
+    List<Appointment> findAllByAppointmentDateBetween(LocalDateTime from, LocalDateTime to);
     @Query("SELECT a FROM Appointment a WHERE a.status = 'REQUESTED'")
     List<Appointment> findAllRequested();
-    boolean existsByAppointmentDate (LocalDateTime appointmentDate);
+    boolean existsByAppointmentDate(LocalDateTime appointmentDate);
+
+    @Query("""
+            SELECT a FROM Appointment a
+            WHERE a.appointmentDate BETWEEN :from AND :to
+            AND (:patientId IS NULL OR a.patient.id = :patientId)
+            AND (:status IS NULL OR a.status = :status)
+            AND (:patientName IS NULL
+                 OR LOWER(a.patient.firstName) LIKE LOWER(CONCAT('%', :patientName, '%'))
+                 OR LOWER(a.patient.lastName)  LIKE LOWER(CONCAT('%', :patientName, '%')))
+            """)
+    List<Appointment> search(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("patientId") UUID patientId,
+            @Param("status") AppointmentStatus status,
+            @Param("patientName") String patientName
+    );
 }

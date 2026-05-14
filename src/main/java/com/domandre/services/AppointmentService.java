@@ -12,7 +12,6 @@ import com.domandre.exceptions.InsufficientPermissionsException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.helpers.BusinessHoursHelper;
 import com.domandre.helpers.BusinessHoursHelper.TimeRange;
-import com.domandre.repositories.AnamnesisRepository;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -115,12 +114,13 @@ public class AppointmentService {
         LocalDate from = request.getFromDate() != null ? request.getFromDate() : LocalDate.now().minusMonths(1);
         LocalDate to = request.getToDate() != null ? request.getToDate() : LocalDate.now().plusMonths(1);
 
-        LocalDateTime fromDateTime = from.atStartOfDay();
-        LocalDateTime toDateTime = to.atTime(23, 59);
-
-        List<Appointment> base = appointmentRepository.findAllByAppointmentDateBetween(fromDateTime, toDateTime);
-
-        return base.stream().filter(appointment -> request.getPatientId() == null || appointment.getPatient().getId().equals(request.getPatientId())).filter(appointment -> request.getStatus() == null || appointment.getStatus() == request.getStatus()).filter(appointment -> request.getPatientName() == null || appointment.getPatient().getFirstName().toLowerCase().contains(request.getPatientName().toLowerCase()) || appointment.getPatient().getLastName().toLowerCase().contains(request.getPatientName().toLowerCase())).toList();
+        return appointmentRepository.search(
+                from.atStartOfDay(),
+                to.atTime(23, 59),
+                request.getPatientId(),
+                request.getStatus(),
+                request.getPatientName()
+        );
     }
 
     public List<Appointment> getTodayAppointments() {
