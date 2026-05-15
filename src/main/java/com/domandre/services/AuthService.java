@@ -4,6 +4,7 @@ import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
 import com.domandre.entities.InvalidToken;
 import com.domandre.entities.User;
+import com.domandre.enums.Role;
 import com.domandre.enums.UserStatus;
 import com.domandre.exceptions.AccountNotVerifiedException;
 import com.domandre.exceptions.EmailIntegrationErrorException;
