@@ -1,5 +1,6 @@
 package com.domandre.controllers.request;
 
+import com.domandre.enums.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,8 @@ public class RegisterRequest {
     @JsonFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "The field Birthdate is missing")
     private LocalDate birthdate;
+
+    private Role role = Role.USER;
 
     @Override
     public String toString() {

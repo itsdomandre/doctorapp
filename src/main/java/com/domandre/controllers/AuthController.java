@@ -2,6 +2,7 @@ package com.domandre.controllers;
 
 import com.domandre.controllers.request.LoginRequest;
 import com.domandre.controllers.request.RegisterRequest;
+import com.domandre.enums.Role;
 import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
@@ -43,6 +44,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDTO> register(@Valid @RequestBody RegisterRequest request) {
+        request.setRole(Role.USER);
         log.info("Registration attempt for new user: {}", request.getEmail());
         User user = authService.register(request);
         log.info("Registration completed for user: {}", request.getEmail());
