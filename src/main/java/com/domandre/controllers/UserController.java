@@ -1,7 +1,9 @@
 package com.domandre.controllers;
 
+import com.domandre.controllers.request.AdminCreateUserRequest;
 import com.domandre.controllers.request.UpdateRoleRequest;
 import com.domandre.controllers.response.UserDTO;
+import org.springframework.http.HttpStatus;
 import java.util.UUID;
 import com.domandre.services.UserService;
 import jakarta.validation.Valid;
@@ -19,6 +21,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
     private final UserService userService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody AdminCreateUserRequest request) {
+        log.info("Admin creating user: {} with role: {}", request.getEmail(), request.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.adminCreateUser(request));
+    }
 
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
