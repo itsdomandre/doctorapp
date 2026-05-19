@@ -26,7 +26,7 @@ public class AuthenticationApiTest extends BaseApiTest {
     }
 
     static class LoginRequestPayload {
-        public String login;
+        public String email;
         public String password;
     }
 
@@ -54,11 +54,11 @@ public class AuthenticationApiTest extends BaseApiTest {
         return p;
     }
 
-    private LoginRequestPayload validLogin(String email) {
-        LoginRequestPayload login = new LoginRequestPayload();
-        login.login = "r9@example.com";
-        login.password = "nextJob!";
-        return login;
+    private LoginRequestPayload loginPayload(String email, String password) {
+        LoginRequestPayload payload = new LoginRequestPayload();
+        payload.email = email;
+        payload.password = password;
+        return payload;
     }
 
     @Test
@@ -131,17 +131,45 @@ public class AuthenticationApiTest extends BaseApiTest {
     }
 
     @Test
-    void login_whenCredentialsExists_shouldReturn200() {
-        String email = "r9@example.com";
-        String password = "nextJob!";
+    void login_withValidActiveCredentials_shouldReturn200() {
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginPayload("deise@example.com", "Password123!"))
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void login_withUnverifiedAccount_shouldReturn403() {
+        String email = uniqueEmail();
 
         given()
                 .contentType(ContentType.JSON)
-                .body(validLogin(email))
-                .body(validLogin(password))
+                .body(validPayload(email))
                 .when()
-                .body("/auth/login")
+                .post("/auth/register")
                 .then()
                 .statusCode(200);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginPayload(email, "P4$$w0rd"))
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void login_withWrongPassword_shouldReturn401() {
+        given()
+                .contentType(ContentType.JSON)
+                .body(loginPayload("deise@example.com", "WrongPassword!"))
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(401);
     }
 }
