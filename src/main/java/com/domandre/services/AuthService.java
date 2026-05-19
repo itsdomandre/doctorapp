@@ -93,6 +93,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
+        invalidTokenRepository.save(new InvalidToken(token, jwtService.getExpirationFromJWT(token)));
         mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
         log.info("Account activated: {}", email);
     }
@@ -112,6 +113,8 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+        invalidTokenRepository.save(new InvalidToken(token, jwtService.getExpirationFromJWT(token)));
+        log.info("Password reset for: {}", email);
     }
 
     public void logout(String jwt) {
