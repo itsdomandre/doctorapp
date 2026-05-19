@@ -36,6 +36,15 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserRole(id, request.getRole()));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("Fetching all users");
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
+    }
+
     @GetMapping("/all-patients")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserDTO>> getAllPatients(
