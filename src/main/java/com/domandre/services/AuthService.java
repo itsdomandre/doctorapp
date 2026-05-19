@@ -95,7 +95,11 @@ public class AuthService {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         invalidTokenRepository.save(new InvalidToken(token, jwtService.getExpirationFromJWT(token)));
-        mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+        try {
+            mailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+        } catch (Exception e) {
+            log.warn("Failed to send welcome email to {}: {}", email, e.getMessage());
+        }
         log.info("Account activated: {}", email);
     }
 
