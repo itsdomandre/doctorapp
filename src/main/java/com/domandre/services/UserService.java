@@ -45,4 +45,10 @@ public class UserService implements UserDetailsService {
         Page<User> users = userRepository.findByRole(Role.USER, pageable);
         return users.map(UserMapper::toDTO);
     }
+
+    public UserDTO updateUserRole(UUID id, Role role) {
+        User user = getUserById(id);
+        user.setRole(role);
+        return UserMapper.toDTO(userRepository.save(user));
+    }
 }
