@@ -6,6 +6,8 @@ import com.domandre.controllers.request.ResetPasswordRequest;
 import com.domandre.controllers.response.UserDTO;
 import com.domandre.entities.User;
 import com.domandre.mappers.UserMapper;
+import com.domandre.exceptions.InvalidTokenException;
+import com.domandre.exceptions.PasswordMismatchException;
 import com.domandre.services.AuthService;
 import com.domandre.services.JwtService;
 import com.domandre.services.UserService;
@@ -83,14 +85,13 @@ public class AuthController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @Valid @RequestBody ResetPasswordRequest body) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body("Missing Authorization: Bearer <token>");
+            throw new InvalidTokenException();
         }
 
         String token = authHeader.substring(7);
 
-        if (body.getConfirmNewPassword() != null &&
-                !body.getNewPassword().equals(body.getConfirmNewPassword())) {
-            return ResponseEntity.badRequest().body("New password and confirm do not match");
+        if (!body.getNewPassword().equals(body.getConfirmNewPassword())) {
+            throw new PasswordMismatchException();
         }
         authService.resetPassword(token, body.getNewPassword());
         return ResponseEntity.ok("Password reset successfully");

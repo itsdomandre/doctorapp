@@ -86,8 +86,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<String> handleInsufficientPermissionsException(InvalidTokenException ex) {
-        return new ResponseEntity<>("Invalid activation token", HttpStatus.CONFLICT);
+    public ResponseEntity<String> handleInvalidTokenException(InvalidTokenException ex) {
+        return new ResponseEntity<>("Invalid or expired token", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<String> handlePasswordMismatchException(PasswordMismatchException ex) {
+        return new ResponseEntity<>("New password and confirm do not match", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccountNotVerifiedException.class)

@@ -85,7 +85,8 @@ public class AuthService {
     }
 
     public void activateAccount(String token) {
-        if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))) {
+        if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))
+                || invalidTokenRepository.existsByToken(token)) {
             throw new InvalidTokenException();
         }
 
@@ -106,7 +107,8 @@ public class AuthService {
     }
 
     public void resetPassword(String token, String newPassword) {
-        if (!jwtService.validateToken(token) || !"password_reset".equals(jwtService.getTypeFromJWT(token))) {
+        if (!jwtService.validateToken(token) || !"password_reset".equals(jwtService.getTypeFromJWT(token))
+                || invalidTokenRepository.existsByToken(token)) {
             throw new InvalidTokenException();
         }
         String email = jwtService.getUsernameFromJWT(token);
