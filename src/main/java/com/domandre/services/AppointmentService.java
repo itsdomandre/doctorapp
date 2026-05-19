@@ -64,8 +64,12 @@ public class AppointmentService {
         return appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    public List<Appointment> getAppointmentsForCurrentUser(User currentUser) {
-        return appointmentRepository.findByPatient(currentUser);
+    public Page<Appointment> getAppointmentsForCurrentUser(User currentUser, AppointmentStatus status, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("appointmentDate").descending());
+        if (status != null) {
+            return appointmentRepository.findByPatientAndStatus(currentUser, status, pageable);
+        }
+        return appointmentRepository.findByPatient(currentUser, pageable);
     }
 
     public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) throws AdminMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {

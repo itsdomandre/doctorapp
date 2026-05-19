@@ -6,6 +6,7 @@ import com.domandre.controllers.request.AppointmentUpdateStatusRequest;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
+import com.domandre.enums.AppointmentStatus;
 import com.domandre.exceptions.*;
 import org.springframework.data.domain.Page;
 import com.domandre.mappers.AppointmentMapper;
@@ -34,7 +35,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final UserService userService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) {
         log.info("Creating appointment for date: {}", request.getDateTime());
         Appointment appointment = appointmentService.createAppointment(request);
@@ -43,14 +44,16 @@ public class AppointmentController {
     }
 
     @GetMapping("/my-appointments")
-    public ResponseEntity<List<AppointmentDTO>> getMyAppointments() {
+    public ResponseEntity<Page<AppointmentDTO>> getMyAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) AppointmentStatus status) {
         User currentUser = userService.getCurrentUser();
-        List<Appointment> appointments = appointmentService.getAppointmentsForCurrentUser(currentUser);
-        log.info("Found {} appointments for user: {}", appointments.size(), currentUser.getEmail());
-        List<AppointmentDTO> dto = appointments.stream()
-                .map(AppointmentMapper::toDTO)
-                .toList();
-        return ResponseEntity.ok(dto);
+        Page<AppointmentDTO> result = appointmentService
+                .getAppointmentsForCurrentUser(currentUser, status, page, size)
+                .map(AppointmentMapper::toDTO);
+        log.info("Found {} appointments for user: {}", result.getTotalElements(), currentUser.getEmail());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/get-all")
