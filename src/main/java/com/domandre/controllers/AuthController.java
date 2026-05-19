@@ -35,7 +35,7 @@ public class AuthController {
     private boolean appCookieSecure;
 
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getLoggedUser() {
         User user = userService.getCurrentUser();
         return ResponseEntity.ok(UserMapper.toDTO(user));
