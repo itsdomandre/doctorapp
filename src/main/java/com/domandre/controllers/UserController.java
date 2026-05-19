@@ -26,7 +26,7 @@ public class UserController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody RegisterRequest request) {
-        log.info("Admin creating new user: {} with role: {}", request.getEmail(), request.getRole());
+        log.info("Admin creating new user: {}", request.getEmail());
         User user = authService.register(request);
         return ResponseEntity.ok(UserMapper.toDTO(user));
     }
