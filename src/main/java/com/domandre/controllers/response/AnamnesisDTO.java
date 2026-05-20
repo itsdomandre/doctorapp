@@ -1,5 +1,6 @@
 package com.domandre.controllers.response;
 
+import com.domandre.enums.Procedures;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -8,6 +9,10 @@ import java.time.LocalDateTime;
 @Data
 public class AnamnesisDTO {
     private Long id;
+    private Long appointmentId;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime appointmentDate;
+    private Procedures procedure;
     private Boolean hasChronicDisease;
     private String chronicDiseaseDescription;
     private Boolean usesContinuousMedication;

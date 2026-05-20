@@ -48,6 +48,11 @@ public class AnamnesisMapper {
     public static AnamnesisDTO toDTO(Anamnesis ficha) {
         AnamnesisDTO dto = new AnamnesisDTO();
         dto.setId(ficha.getId());
+        if (ficha.getAppointment() != null) {
+            dto.setAppointmentId(ficha.getAppointment().getId());
+            dto.setAppointmentDate(ficha.getAppointment().getAppointmentDate());
+            dto.setProcedure(ficha.getAppointment().getProcedure());
+        }
         dto.setCreatedAt(ficha.getCreatedAt());
         dto.setUpdatedAt(ficha.getUpdatedAt());
         dto.setHasChronicDisease(ficha.getHasChronicDisease());
