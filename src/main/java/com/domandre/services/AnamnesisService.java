@@ -125,4 +125,36 @@ public class AnamnesisService {
         anamnesis.setUpdatedAt(LocalDateTime.now());
         return repository.save(anamnesis);
     }
+
+    @Transactional
+    public Anamnesis createForPatient(User patient, Long appointmentId, AnamnesisRequest request) {
+        Appointment appointment = appointmentService.getOrThrow(appointmentId);
+        if (!appointment.getPatient().getId().equals(patient.getId())) {
+            throw new ResourceNotFoundException();
+        }
+        if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
+            throw new AppointmentNotAprovedException();
+        }
+        if (appointment.getAnamnesis() != null) {
+            throw new AnamnesisAlreadyExistsException();
+        }
+        Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
+        anamnesis.setPatient(patient);
+        anamnesis.setAppointment(appointment);
+        Anamnesis created = repository.save(anamnesis);
+        appointment.setAnamnesis(created);
+        appointmentRepository.save(appointment);
+        return created;
+    }
+
+    public Anamnesis getByAppointmentIdForPatient(Long appointmentId, User patient) {
+        Appointment appointment = appointmentService.getOrThrow(appointmentId);
+        if (!appointment.getPatient().getId().equals(patient.getId())) {
+            throw new ResourceNotFoundException();
+        }
+        if (appointment.getAnamnesis() == null) {
+            throw new ResourceNotFoundException();
+        }
+        return appointment.getAnamnesis();
+    }
 }

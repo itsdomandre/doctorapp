@@ -25,6 +25,9 @@ public class AppointmentMapper {
         dto.setMessages(appointment.getMessages().stream()
                 .map(AppointmentMessageMapper::toDTO)
                 .collect(Collectors.toList()));
+        if (appointment.getAnamnesis() != null) {
+            dto.setAnamnesisId(appointment.getAnamnesis().getId());
+        }
         return dto;
     }
 }
