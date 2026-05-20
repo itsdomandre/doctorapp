@@ -5,12 +5,12 @@ import com.domandre.enums.Procedures;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -50,4 +50,11 @@ public class Appointment {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String notes;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("createdAt ASC")
+    @BatchSize(size = 20)
+    @ToString.Exclude
+    @Builder.Default
+    private List<AppointmentMessage> messages = new ArrayList<>();
 }

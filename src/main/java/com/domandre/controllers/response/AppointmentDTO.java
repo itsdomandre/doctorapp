@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,4 +21,5 @@ public class AppointmentDTO {
     private LocalDateTime updatedAt;
     private String notes;
     private String doctorName;
+    private List<AppointmentMessageDTO> messages;
 }

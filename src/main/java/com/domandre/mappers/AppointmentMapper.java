@@ -3,6 +3,8 @@ package com.domandre.mappers;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 
+import java.util.stream.Collectors;
+
 public class AppointmentMapper {
     public static AppointmentDTO toDTO(Appointment appointment){
         AppointmentDTO dto = new AppointmentDTO();
@@ -20,6 +22,9 @@ public class AppointmentMapper {
         if (appointment.getDoctor() != null){
             dto.setDoctorName(appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName());
         }
+        dto.setMessages(appointment.getMessages().stream()
+                .map(AppointmentMessageMapper::toDTO)
+                .collect(Collectors.toList()));
         return dto;
     }
 }
