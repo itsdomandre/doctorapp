@@ -56,8 +56,12 @@ public class AuthService {
 
         userRepository.save(user);
         String activationToken = jwtService.generateTokenToActivatonOrReset(user.getEmail(), activationTokenTtlMs, "activation");
-        mailService.sendActivationEmail(user.getEmail(), activationToken);
-        log.info("User {} registered as PENDING and activation email sent.", user.getEmail());
+        try {
+            mailService.sendActivationEmail(user.getEmail(), activationToken);
+            log.info("User {} registered and activation email sent.", user.getEmail());
+        } catch (Exception e) {
+            log.warn("Failed to send activation email to {}: {}. User can request resend.", user.getEmail(), e.getMessage());
+        }
         if (logTokens) {
             log.info("[DEV] Activate via backend: /api/auth/activate?token={}", activationToken);
         }
