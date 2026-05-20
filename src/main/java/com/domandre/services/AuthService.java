@@ -85,13 +85,22 @@ public class AuthService {
     }
 
     public void activateAccount(String token) {
-        if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))
-                || invalidTokenRepository.existsByToken(token)) {
+        if (!jwtService.validateToken(token) || !"activation".equals(jwtService.getTypeFromJWT(token))) {
             throw new InvalidTokenException();
         }
 
         String email = jwtService.getUsernameFromJWT(token);
         User user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
+
+        // Idempotent: if already active the token was already consumed — treat as success.
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            return;
+        }
+
+        if (invalidTokenRepository.existsByToken(token)) {
+            throw new InvalidTokenException();
+        }
+
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         invalidTokenRepository.save(new InvalidToken(token, jwtService.getExpirationFromJWT(token)));
