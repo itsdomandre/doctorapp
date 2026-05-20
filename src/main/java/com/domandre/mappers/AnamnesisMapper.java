@@ -49,6 +49,7 @@ public class AnamnesisMapper {
         AnamnesisDTO dto = new AnamnesisDTO();
         dto.setId(ficha.getId());
         dto.setCreatedAt(ficha.getCreatedAt());
+        dto.setUpdatedAt(ficha.getUpdatedAt());
         dto.setHasChronicDisease(ficha.getHasChronicDisease());
         dto.setChronicDiseaseDescription(ficha.getChronicDiseaseDescription());
         dto.setUsesContinuousMedication(ficha.getUsesContinuousMedication());

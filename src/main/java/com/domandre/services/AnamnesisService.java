@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -37,11 +38,15 @@ public class AnamnesisService {
         return repository.findTopByPatientIdOrderByCreatedAtDesc(patientId);
     }
 
+    public List<Anamnesis> getAnamnesisHistory(UUID patientId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : null;
+        return repository.findByPatientIdAndDateRange(patientId, start, end);
+    }
+
     @Transactional
     public Anamnesis createAnamnesis(UUID patientId, Long appointmentId, AnamnesisRequest request) throws ResourceNotFoundException, AppointmentNotAprovedException, AnamnesisAlreadyExistsException {
         User patient = userService.getUserById(patientId);
-        LocalDateTime now = LocalDateTime.now();
-
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!AppointmentStatus.APPROVED.equals(appointment.getStatus())) {
             log.info("Anamnesis can only created for approved appointment");
@@ -55,7 +60,6 @@ public class AnamnesisService {
         Anamnesis anamnesis = AnamnesisMapper.fromRequest(request);
         anamnesis.setPatient(patient);
         anamnesis.setAppointment(appointment);
-        anamnesis.setCreatedAt(LocalDateTime.now());
 
         Anamnesis createdAnamnesis = repository.save(anamnesis);
         appointment.setAnamnesis(createdAnamnesis);

@@ -1,5 +1,6 @@
 package com.domandre.controllers.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,9 @@ public class AnamnesisDTO {
     private String contraceptiveDescription;
     private Boolean hasFoodAllergy;
     private String foodAllergyDescription;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
     private String notes;
 }

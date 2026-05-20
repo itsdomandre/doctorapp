@@ -30,27 +30,39 @@ public class AdminSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (userRepository.existsByEmail(adminEmail)) {
-            return;
-        }
-
-        String rawPassword = generatePassword();
-
-        User admin = new User();
-        admin.setFirstName("Admin");
-        admin.setLastName("System");
-        admin.setEmail(adminEmail);
-        admin.setPassword(passwordEncoder.encode(rawPassword));
-        admin.setRole(Role.ADMIN);
-        admin.setStatus(UserStatus.ACTIVE);
-
-        userRepository.save(admin);
-
-        log.warn("==========================================================");
-        log.warn("  Admin account created: {}",  adminEmail);
-        log.warn("  Temporary password:    {}", rawPassword);
-        log.warn("  Change this password after first login.");
-        log.warn("==========================================================");
+        userRepository.findByEmail(adminEmail).ifPresentOrElse(
+            existing -> {
+                boolean changed = false;
+                if (existing.getRole() != Role.ADMIN) {
+                    existing.setRole(Role.ADMIN);
+                    changed = true;
+                }
+                if (existing.getStatus() != UserStatus.ACTIVE) {
+                    existing.setStatus(UserStatus.ACTIVE);
+                    changed = true;
+                }
+                if (changed) {
+                    userRepository.save(existing);
+                    log.warn("Admin account {} corrected — role/status updated to ADMIN/ACTIVE.", adminEmail);
+                }
+            },
+            () -> {
+                String rawPassword = generatePassword();
+                User admin = new User();
+                admin.setFirstName("Admin");
+                admin.setLastName("System");
+                admin.setEmail(adminEmail);
+                admin.setPassword(passwordEncoder.encode(rawPassword));
+                admin.setRole(Role.ADMIN);
+                admin.setStatus(UserStatus.ACTIVE);
+                userRepository.save(admin);
+                log.warn("==========================================================");
+                log.warn("  Admin account created: {}", adminEmail);
+                log.warn("  Temporary password:    {}", rawPassword);
+                log.warn("  Change this password after first login.");
+                log.warn("==========================================================");
+            }
+        );
     }
 
     private String generatePassword() {

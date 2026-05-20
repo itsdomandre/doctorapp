@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,17 +80,14 @@ public class AnamnesisController {
     }
 
     @GetMapping("/patient/{patientId}/history")
-    public ResponseEntity<List<AnamnesisDTO>> getAnamnesisHistory(@PathVariable UUID patientId, @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
-        List<Anamnesis> anamneses = anamnesisService.getAnamnesesByPatient(patientId);
-        List<AnamnesisDTO> dtos = new ArrayList<>();
-
-        for (Anamnesis a : anamneses) {
-            if (a.getCreatedAt() == null) continue;
-            LocalDate createdDate = a.getCreatedAt().toLocalDate();
-            if (startDate != null && createdDate.isBefore(startDate)) continue;
-            if (endDate != null && createdDate.isAfter(endDate)) continue;
-            dtos.add(AnamnesisMapper.toDTO(a));
-        }
+    public ResponseEntity<List<AnamnesisDTO>> getAnamnesisHistory(
+            @PathVariable UUID patientId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+        List<AnamnesisDTO> dtos = anamnesisService.getAnamnesisHistory(patientId, startDate, endDate)
+                .stream()
+                .map(AnamnesisMapper::toDTO)
+                .toList();
         return ResponseEntity.ok(dtos);
     }
 }

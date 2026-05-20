@@ -1,12 +1,8 @@
 package com.domandre.controllers.request;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnamnesisRequest {
     private Boolean hasChronicDisease;
     private String chronicDiseaseDescription;
@@ -39,7 +35,5 @@ public class AnamnesisRequest {
     private String contraceptiveDescription;
     private Boolean hasFoodAllergy;
     private String foodAllergyDescription;
-    private LocalDateTime createdAt;
-    private LocalDateTime updateAt;
     private String notes;
 }
