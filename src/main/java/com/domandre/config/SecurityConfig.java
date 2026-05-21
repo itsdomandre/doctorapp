@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password",
-                                "/api/appointment/slots")
+                                "/api/appointment/slots",
+                                "/api/appointment/monthly-availability")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

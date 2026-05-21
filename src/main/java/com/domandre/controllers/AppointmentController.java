@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -115,6 +117,12 @@ public class AppointmentController {
         Appointment cancelled = appointmentService.cancelAppointment(id);
         log.info("Appointment ID={} cancelled successfully", id);
         return ResponseEntity.ok(AppointmentMapper.toDTO(cancelled));
+    }
+
+    @GetMapping("/monthly-availability")
+    public ResponseEntity<Map<String, Long>> getMonthlyAvailability(@RequestParam("month") String month) {
+        log.info("Fetching monthly availability for: {}", month);
+        return ResponseEntity.ok(appointmentService.getMonthlyAvailability(YearMonth.parse(month)));
     }
 
     @GetMapping("/pending")

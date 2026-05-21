@@ -25,8 +25,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -156,5 +159,41 @@ public class AppointmentService {
 
     public List<Appointment> getPendingAppointments() {
         return appointmentRepository.findAllRequested();
+    }
+
+    public Map<String, Long> getMonthlyAvailability(YearMonth yearMonth) {
+        LocalDate firstDay = yearMonth.atDay(1);
+        LocalDate lastDay = yearMonth.atEndOfMonth();
+
+        List<LocalDateTime> takenSlots = appointmentRepository
+                .findAllByAppointmentDateBetween(firstDay.atStartOfDay(), lastDay.atTime(23, 59))
+                .stream()
+                .map(Appointment::getAppointmentDate)
+                .toList();
+
+        Map<String, Long> availability = new LinkedHashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (LocalDate date = firstDay; !date.isAfter(lastDay); date = date.plusDays(1)) {
+            Optional<TimeRange> rangeOpt = BusinessHoursHelper.getBusinessHours(date.getDayOfWeek());
+            if (rangeOpt.isEmpty()) continue;
+
+            TimeRange range = rangeOpt.get();
+            LocalTime start = range.start();
+            LocalTime end = range.end().minusHours(1);
+
+            long count = 0;
+            for (LocalTime time = start; !time.isAfter(end); time = time.plusHours(1)) {
+                LocalDateTime slot = LocalDateTime.of(date, time);
+                if (slot.isBefore(now)) continue;
+                if (!takenSlots.contains(slot)) count++;
+            }
+
+            if (count > 0) {
+                availability.put(date.toString(), count);
+            }
+        }
+
+        return availability;
     }
 }
