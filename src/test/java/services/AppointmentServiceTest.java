@@ -1,6 +1,9 @@
 package services;
 
 import com.domandre.entities.Appointment;
+import com.domandre.entities.User;
+import com.domandre.enums.AppointmentStatus;
+import com.domandre.exceptions.AppointmentNotCancellableException;
 import com.domandre.repositories.AppointmentRepository;
 import com.domandre.repositories.UserRepository;
 import com.domandre.services.AppointmentService;
@@ -12,8 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Optional;
+import java.util.UUID;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +62,47 @@ public class AppointmentServiceTest {
 
         assertTrue(availableSlots.contains(before), before + " should be available");
         assertTrue(availableSlots.contains(after), after + " should be available");
+    }
+
+    @Test
+    void cancelAppointment_whenWithin24Hours_shouldThrowException() {
+        UUID patientId = UUID.randomUUID();
+        User patient = new User();
+        patient.setId(patientId);
+
+        Appointment appointment = Appointment.builder()
+                .id(1L)
+                .patient(patient)
+                .status(AppointmentStatus.REQUESTED)
+                .appointmentDate(LocalDateTime.now().plusHours(12))
+                .build();
+
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        when(userService.getCurrentUser()).thenReturn(patient);
+
+        assertThrows(AppointmentNotCancellableException.class, () -> appointmentService.cancelAppointment(1L));
+    }
+
+    @Test
+    void cancelAppointment_whenMoreThan24HoursAway_shouldCancel() {
+        UUID patientId = UUID.randomUUID();
+        User patient = new User();
+        patient.setId(patientId);
+
+        Appointment appointment = Appointment.builder()
+                .id(1L)
+                .patient(patient)
+                .status(AppointmentStatus.REQUESTED)
+                .appointmentDate(LocalDateTime.now().plusHours(48))
+                .build();
+
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        when(userService.getCurrentUser()).thenReturn(patient);
+        when(appointmentRepository.save(appointment)).thenReturn(appointment);
+
+        Appointment result = appointmentService.cancelAppointment(1L);
+
+        assertEquals(AppointmentStatus.CANCELLED, result.getStatus());
     }
 
     private LocalDate getNextValidBusinessDay(DayOfWeek dayOfWeek) {

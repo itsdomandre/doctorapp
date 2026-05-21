@@ -146,6 +146,9 @@ public class AppointmentService {
                 || appointment.getStatus() == AppointmentStatus.REJECTED) {
             throw new AppointmentNotCancellableException();
         }
+        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now().plusHours(24))) {
+            throw new AppointmentNotCancellableException();
+        }
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointment.setUpdatedAt(LocalDateTime.now());
         return appointmentRepository.save(appointment);
