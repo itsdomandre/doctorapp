@@ -121,13 +121,29 @@ public class AppointmentService {
         LocalDate from = request.getFromDate() != null ? request.getFromDate() : LocalDate.now().minusMonths(1);
         LocalDate to = request.getToDate() != null ? request.getToDate() : LocalDate.now().plusMonths(1);
 
-        return appointmentRepository.search(
+        List<Appointment> results = appointmentRepository.search(
                 from.atStartOfDay(),
                 to.atTime(23, 59),
                 request.getPatientId(),
-                request.getStatus(),
-                request.getPatientName()
+                request.getStatus()
         );
+
+        // first_name/last_name are stored as bytea; LOWER() on bytea fails in PostgreSQL,
+        // so name filtering is done here after Hibernate deserialises the fields.
+        String nameFilter = request.getPatientName();
+        if (nameFilter == null || nameFilter.isBlank()) {
+            return results;
+        }
+        String term = nameFilter.trim().toLowerCase();
+        return results.stream()
+                .filter(a -> {
+                    User p = a.getPatient();
+                    if (p == null) return false;
+                    String full = ((p.getFirstName() != null ? p.getFirstName() : "") + " " +
+                                   (p.getLastName()  != null ? p.getLastName()  : "")).toLowerCase();
+                    return full.contains(term);
+                })
+                .collect(Collectors.toList());
     }
 
     public Page<Appointment> getTodayAppointments(int page, int size) {

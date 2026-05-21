@@ -25,20 +25,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllRequested();
     boolean existsByAppointmentDate(LocalDateTime appointmentDate);
 
+    // patientName is intentionally excluded from this query: first_name/last_name
+    // are stored as bytea (encrypted at the DB level), so LOWER() fails at the
+    // PostgreSQL type-check stage even when the parameter is null. Name filtering
+    // is applied in-memory by AppointmentService after Hibernate deserialises the fields.
     @Query("""
             SELECT a FROM Appointment a
             WHERE a.appointmentDate BETWEEN :from AND :to
             AND (:patientId IS NULL OR a.patient.id = :patientId)
             AND (:status IS NULL OR a.status = :status)
-            AND (:patientName IS NULL
-                 OR LOWER(a.patient.firstName) LIKE LOWER(CONCAT('%', :patientName, '%'))
-                 OR LOWER(a.patient.lastName)  LIKE LOWER(CONCAT('%', :patientName, '%')))
             """)
     List<Appointment> search(
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
             @Param("patientId") UUID patientId,
-            @Param("status") AppointmentStatus status,
-            @Param("patientName") String patientName
+            @Param("status") AppointmentStatus status
     );
 }
