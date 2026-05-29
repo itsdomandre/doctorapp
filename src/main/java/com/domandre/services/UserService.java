@@ -51,6 +51,11 @@ public class UserService implements UserDetailsService {
         return users.map(UserMapper::toDTO);
     }
 
+    public Page<UserDTO> getAllDoctors(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending());
+        return userRepository.findByRole(Role.DOCTOR, pageable).map(UserMapper::toDTO);
+    }
+
     public Page<UserDTO> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending());
         return userRepository.findAll(pageable).map(UserMapper::toDTO);

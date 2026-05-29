@@ -61,9 +61,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Patient already has an anamnesis record.", HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(AdminMustBeProvidedException.class)
-    public ResponseEntity<String> handleAdminMustBeProvidedException(AdminMustBeProvidedException ex) {
-        return new ResponseEntity<>("Admin must be provided", HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(DoctorMustBeProvidedException.class)
+    public ResponseEntity<String> handleDoctorMustBeProvidedException(DoctorMustBeProvidedException ex) {
+        return new ResponseEntity<>("A doctor must be assigned when approving an appointment", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InsufficientPermissionsException.class)

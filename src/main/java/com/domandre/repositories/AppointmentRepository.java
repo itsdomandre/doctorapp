@@ -19,6 +19,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByPatient(User patient);
     Page<Appointment> findByPatient(User patient, Pageable pageable);
     Page<Appointment> findByPatientAndStatus(User patient, AppointmentStatus status, Pageable pageable);
+    Page<Appointment> findByDoctor(User doctor, Pageable pageable);
+    Page<Appointment> findByDoctorAndStatus(User doctor, AppointmentStatus status, Pageable pageable);
     List<Appointment> findAllByAppointmentDateBetween(LocalDateTime from, LocalDateTime to);
     Page<Appointment> findAllByAppointmentDateBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
     @Query("SELECT a FROM Appointment a WHERE a.status = 'REQUESTED'")

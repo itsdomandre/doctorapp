@@ -135,4 +135,28 @@ public class AppointmentController {
                 .map(AppointmentMapper::toDTO)
                 .toList());
     }
+
+    @GetMapping("/doctor/my-appointments")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<Page<AppointmentDTO>> getDoctorAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) AppointmentStatus status) {
+        User currentDoctor = userService.getCurrentUser();
+        Page<AppointmentDTO> result = appointmentService
+                .getAppointmentsForCurrentDoctor(currentDoctor, status, page, size)
+                .map(AppointmentMapper::toDTO);
+        log.info("Found {} appointments for doctor: {}", result.getTotalElements(), currentDoctor.getEmail());
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}/complete")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<AppointmentDTO> completeAppointment(@PathVariable Long id) {
+        User currentDoctor = userService.getCurrentUser();
+        log.info("Doctor {} marking appointment ID={} as COMPLETED", currentDoctor.getEmail(), id);
+        Appointment completed = appointmentService.completeAppointment(id, currentDoctor);
+        log.info("Appointment ID={} marked as COMPLETED", id);
+        return ResponseEntity.ok(AppointmentMapper.toDTO(completed));
+    }
 }

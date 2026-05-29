@@ -6,8 +6,8 @@ import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
-import com.domandre.exceptions.AdminMustBeProvidedException;
 import com.domandre.exceptions.AppointmentNotCancellableException;
+import com.domandre.exceptions.DoctorMustBeProvidedException;
 import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
 import com.domandre.exceptions.InsufficientPermissionsException;
 import com.domandre.exceptions.ResourceNotFoundException;
@@ -75,21 +75,42 @@ public class AppointmentService {
         return appointmentRepository.findByPatient(currentUser, pageable);
     }
 
-    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) throws AdminMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {
+    public Appointment updateAppointmentStatus(Long id, AppointmentStatus newStatus, UUID doctorId) throws DoctorMustBeProvidedException, InsufficientPermissionsException, ResourceNotFoundException {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
 
         appointment.setStatus(newStatus);
         if (newStatus == AppointmentStatus.APPROVED) {
             if (doctorId == null) {
-                throw new AdminMustBeProvidedException();
+                throw new DoctorMustBeProvidedException();
             }
             User doctor = userRepository.findById(doctorId).orElseThrow(ResourceNotFoundException::new);
-            if (doctor.getRole() != Role.ADMIN) {
+            if (doctor.getRole() != Role.DOCTOR) {
                 throw new InsufficientPermissionsException();
             }
             appointment.setDoctor(doctor);
             appointment.setUpdatedAt(LocalDateTime.now());
         }
+        return appointmentRepository.save(appointment);
+    }
+
+    public Page<Appointment> getAppointmentsForCurrentDoctor(User doctor, AppointmentStatus status, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("appointmentDate").descending());
+        if (status != null) {
+            return appointmentRepository.findByDoctorAndStatus(doctor, status, pageable);
+        }
+        return appointmentRepository.findByDoctor(doctor, pageable);
+    }
+
+    public Appointment completeAppointment(Long id, User currentDoctor) throws ResourceNotFoundException, InsufficientPermissionsException {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(currentDoctor.getId())) {
+            throw new InsufficientPermissionsException();
+        }
+        if (appointment.getStatus() != AppointmentStatus.APPROVED) {
+            throw new InsufficientPermissionsException();
+        }
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointment.setUpdatedAt(LocalDateTime.now());
         return appointmentRepository.save(appointment);
     }
 

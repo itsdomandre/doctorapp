@@ -53,4 +53,13 @@ public class UserController {
         log.info("Fetching all patients");
         return ResponseEntity.ok(userService.getAllPatients(page, size));
     }
+
+    @GetMapping("/doctors")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserDTO>> getAllDoctors(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("Fetching all doctors");
+        return ResponseEntity.ok(userService.getAllDoctors(page, size));
+    }
 }
