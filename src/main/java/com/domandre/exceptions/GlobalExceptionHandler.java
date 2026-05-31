@@ -1,5 +1,6 @@
 package com.domandre.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -38,6 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex) {
+        log.warn("AUDIT: Failed login attempt — bad credentials");
         return new ResponseEntity<>("Invalid Credentials. Please Try again.", HttpStatus.UNAUTHORIZED);
     }
 
@@ -68,6 +71,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientPermissionsException.class)
     public ResponseEntity<String> handleInsufficientPermissionsException(InsufficientPermissionsException ex) {
+        log.warn("AUDIT: Unauthorized resource access attempt");
         return new ResponseEntity<>("Insufficient Permissions, please check again", HttpStatus.FORBIDDEN);
     }
 
@@ -97,6 +101,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountNotVerifiedException.class)
     public ResponseEntity<String> handleAccountNotVerifiedException(AccountNotVerifiedException ex) {
+        log.warn("AUDIT: Login attempt for unverified account");
         return new ResponseEntity<>("Account not verified. Please check your email to activate your account.", HttpStatus.FORBIDDEN);
     }
 

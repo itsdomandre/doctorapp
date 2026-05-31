@@ -107,7 +107,9 @@ public class AuthController {
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String jwt = jwtService.resolveToken(request);
         if (jwt != null) {
+            String userEmail = jwtService.getUsernameFromJWT(jwt);
             authService.logout(jwt);
+            log.info("Logout successful for user: {}", userEmail);
         }
         ResponseCookie deleteCookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
@@ -118,7 +120,6 @@ public class AuthController {
                 .build();
 
         response.setHeader("Set-Cookie", deleteCookie.toString());
-        log.info("Logout successfully");
         return ResponseEntity.ok("Logout successfully");
     }
 }
