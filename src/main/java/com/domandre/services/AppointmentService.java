@@ -194,6 +194,14 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    public Page<Appointment> getPatientAppointmentHistory(UUID patientId, LocalDate from, LocalDate to, AppointmentStatus status, int page, int size) {
+        userRepository.findById(patientId).orElseThrow(ResourceNotFoundException::new);
+        LocalDateTime fromDt = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDt   = to   != null ? to.atTime(23, 59, 59) : null;
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("appointmentDate").descending());
+        return appointmentRepository.findPatientHistory(patientId, fromDt, toDt, status, pageable);
+    }
+
     public List<Appointment> getPendingAppointments() {
         return appointmentRepository.findAllRequested();
     }

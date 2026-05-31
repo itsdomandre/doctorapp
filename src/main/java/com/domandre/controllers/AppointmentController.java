@@ -150,6 +150,23 @@ public class AppointmentController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/report/patient/{patientId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<AppointmentDTO>> getPatientHistory(
+            @PathVariable java.util.UUID patientId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) AppointmentStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("ADMIN requesting appointment history for patientId={} | from={} | to={} | status={}", patientId, from, to, status);
+        Page<AppointmentDTO> result = appointmentService
+                .getPatientAppointmentHistory(patientId, from, to, status, page, size)
+                .map(AppointmentMapper::toDTO);
+        log.info("Patient history: {} total records for patientId={}", result.getTotalElements(), patientId);
+        return ResponseEntity.ok(result);
+    }
+
     @PutMapping("/{id}/complete")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<AppointmentDTO> completeAppointment(@PathVariable Long id) {

@@ -43,4 +43,28 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("patientId") UUID patientId,
             @Param("status") AppointmentStatus status
     );
+
+    @Query(
+        value = """
+            SELECT a FROM Appointment a
+            WHERE a.patient.id = :patientId
+            AND (:from IS NULL OR a.appointmentDate >= :from)
+            AND (:to   IS NULL OR a.appointmentDate <= :to)
+            AND (:status IS NULL OR a.status = :status)
+            """,
+        countQuery = """
+            SELECT COUNT(a) FROM Appointment a
+            WHERE a.patient.id = :patientId
+            AND (:from IS NULL OR a.appointmentDate >= :from)
+            AND (:to   IS NULL OR a.appointmentDate <= :to)
+            AND (:status IS NULL OR a.status = :status)
+            """
+    )
+    Page<Appointment> findPatientHistory(
+            @Param("patientId") UUID patientId,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("status") AppointmentStatus status,
+            Pageable pageable
+    );
 }
