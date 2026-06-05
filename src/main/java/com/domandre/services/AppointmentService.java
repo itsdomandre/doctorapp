@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -102,6 +103,7 @@ public class AppointmentService {
         return appointmentRepository.findByDoctor(doctor, pageable);
     }
 
+    @Transactional(readOnly = true)
     public Appointment getAppointmentForUser(Long id, User currentUser) {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (currentUser.getRole() == Role.ADMIN) {

@@ -58,9 +58,8 @@ public class Appointment {
     @Builder.Default
     private List<AppointmentMessage> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("createdAt ASC")
-    @BatchSize(size = 20)
     @ToString.Exclude
     @Builder.Default
     private List<DoctorNote> doctorNotes = new ArrayList<>();
