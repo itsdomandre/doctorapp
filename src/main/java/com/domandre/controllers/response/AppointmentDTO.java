@@ -23,4 +23,5 @@ public class AppointmentDTO {
     private String doctorName;
     private List<AppointmentMessageDTO> messages;
     private Long anamnesisId;
+    private List<DoctorNoteDTO> doctorNotes;
 }

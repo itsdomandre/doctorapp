@@ -3,14 +3,19 @@ package com.domandre.controllers;
 import com.domandre.controllers.request.AppointmentRequest;
 import com.domandre.controllers.request.AppointmentSearchRequest;
 import com.domandre.controllers.request.AppointmentUpdateStatusRequest;
+import com.domandre.controllers.request.DoctorNoteRequest;
 import com.domandre.controllers.response.AppointmentDTO;
+import com.domandre.controllers.response.DoctorNoteDTO;
 import com.domandre.entities.Appointment;
+import com.domandre.entities.DoctorNote;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.exceptions.*;
 import org.springframework.data.domain.Page;
 import com.domandre.mappers.AppointmentMapper;
+import com.domandre.mappers.DoctorNoteMapper;
 import com.domandre.services.AppointmentService;
+import com.domandre.services.DoctorNoteService;
 import com.domandre.services.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -36,6 +41,7 @@ import java.util.Map;
 public class AppointmentController {
     private final AppointmentService appointmentService;
     private final UserService userService;
+    private final DoctorNoteService doctorNoteService;
 
     @PostMapping
     public ResponseEntity<AppointmentDTO> createAppointment(@Valid @RequestBody AppointmentRequest request) {
@@ -165,6 +171,26 @@ public class AppointmentController {
                 .map(AppointmentMapper::toDTO);
         log.info("Patient history: {} total records for patientId={}", result.getTotalElements(), patientId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<AppointmentDTO> getAppointmentById(@PathVariable Long id) {
+        User currentUser = userService.getCurrentUser();
+        log.info("User {} fetching appointment ID={}", currentUser.getEmail(), id);
+        Appointment appointment = appointmentService.getAppointmentForUser(id, currentUser);
+        return ResponseEntity.ok(AppointmentMapper.toDTO(appointment));
+    }
+
+    @PostMapping("/{id}/doctor-notes")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<DoctorNoteDTO> addDoctorNote(
+            @PathVariable Long id,
+            @Valid @RequestBody DoctorNoteRequest request) {
+        User doctor = userService.getCurrentUser();
+        log.info("Doctor {} adding note to appointment ID={}", doctor.getEmail(), id);
+        DoctorNote note = doctorNoteService.addNote(id, doctor, request);
+        return ResponseEntity.ok(DoctorNoteMapper.toDTO(note));
     }
 
     @PutMapping("/{id}/complete")

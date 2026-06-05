@@ -6,6 +6,7 @@ import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
 import com.domandre.enums.Role;
+import com.domandre.exceptions.AnamnesisRequiredException;
 import com.domandre.exceptions.AppointmentNotCancellableException;
 import com.domandre.exceptions.DoctorMustBeProvidedException;
 import com.domandre.exceptions.DateTimeRequestIsNotPermittedException;
@@ -101,6 +102,17 @@ public class AppointmentService {
         return appointmentRepository.findByDoctor(doctor, pageable);
     }
 
+    public Appointment getAppointmentForUser(Long id, User currentUser) {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        if (currentUser.getRole() == Role.ADMIN) {
+            return appointment;
+        }
+        if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(currentUser.getId())) {
+            throw new InsufficientPermissionsException();
+        }
+        return appointment;
+    }
+
     public Appointment completeAppointment(Long id, User currentDoctor) throws ResourceNotFoundException, InsufficientPermissionsException {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(currentDoctor.getId())) {
@@ -108,6 +120,9 @@ public class AppointmentService {
         }
         if (appointment.getStatus() != AppointmentStatus.APPROVED) {
             throw new InsufficientPermissionsException();
+        }
+        if (appointment.getAnamnesis() == null) {
+            throw new AnamnesisRequiredException();
         }
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointment.setUpdatedAt(LocalDateTime.now());

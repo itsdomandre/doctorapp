@@ -3,6 +3,7 @@ package com.domandre.mappers;
 import com.domandre.controllers.response.AppointmentDTO;
 import com.domandre.entities.Appointment;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class AppointmentMapper {
@@ -27,6 +28,11 @@ public class AppointmentMapper {
                 .collect(Collectors.toList()));
         if (appointment.getAnamnesis() != null) {
             dto.setAnamnesisId(appointment.getAnamnesis().getId());
+        }
+        if (appointment.getDoctorNotes() != null && !appointment.getDoctorNotes().isEmpty()) {
+            dto.setDoctorNotes(appointment.getDoctorNotes().stream()
+                    .map(DoctorNoteMapper::toDTO)
+                    .collect(Collectors.toList()));
         }
         return dto;
     }

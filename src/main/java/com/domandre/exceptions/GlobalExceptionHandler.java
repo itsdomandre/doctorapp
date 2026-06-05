@@ -110,6 +110,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Appointment cannot be cancelled in its current status.", HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(AnamnesisRequiredException.class)
+    public ResponseEntity<String> handleAnamnesisRequiredException(AnamnesisRequiredException ex) {
+        return new ResponseEntity<>("Patient anamnesis must be completed before this action.", HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(EmailIntegrationErrorException.class)
     public ResponseEntity<String> handleEmailIntegrationErrorException(EmailIntegrationErrorException ex) {
         return new ResponseEntity<>("Failed to send email. Please try again later.", HttpStatus.SERVICE_UNAVAILABLE);

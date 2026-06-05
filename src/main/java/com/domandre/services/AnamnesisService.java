@@ -5,8 +5,10 @@ import com.domandre.entities.Anamnesis;
 import com.domandre.entities.Appointment;
 import com.domandre.entities.User;
 import com.domandre.enums.AppointmentStatus;
+import com.domandre.enums.Role;
 import com.domandre.exceptions.AnamnesisAlreadyExistsException;
 import com.domandre.exceptions.AppointmentNotAprovedException;
+import com.domandre.exceptions.InsufficientPermissionsException;
 import com.domandre.exceptions.ResourceNotFoundException;
 import com.domandre.mappers.AnamnesisMapper;
 import com.domandre.repositories.AnamnesisRepository;
@@ -151,6 +153,19 @@ public class AnamnesisService {
         Appointment appointment = appointmentService.getOrThrow(appointmentId);
         if (!appointment.getPatient().getId().equals(patient.getId())) {
             throw new ResourceNotFoundException();
+        }
+        if (appointment.getAnamnesis() == null) {
+            throw new ResourceNotFoundException();
+        }
+        return appointment.getAnamnesis();
+    }
+
+    public Anamnesis getByAppointmentIdForDoctorOrAdmin(Long appointmentId, User currentUser) {
+        Appointment appointment = appointmentService.getOrThrow(appointmentId);
+        if (currentUser.getRole() != Role.ADMIN) {
+            if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(currentUser.getId())) {
+                throw new InsufficientPermissionsException();
+            }
         }
         if (appointment.getAnamnesis() == null) {
             throw new ResourceNotFoundException();

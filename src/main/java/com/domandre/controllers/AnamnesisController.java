@@ -105,6 +105,17 @@ public class AnamnesisController {
         return ResponseEntity.ok(dtos);
     }
 
+    // ── Doctor endpoints ──────────────────────────────────────────────────────
+
+    @GetMapping("/appointment/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<AnamnesisDTO> getAnamnesisForDoctor(@PathVariable Long appointmentId) {
+        User currentUser = userService.getCurrentUser();
+        log.info("User {} requesting anamnesis for appointment {}", currentUser.getEmail(), appointmentId);
+        Anamnesis anamnesis = anamnesisService.getByAppointmentIdForDoctorOrAdmin(appointmentId, currentUser);
+        return ResponseEntity.ok(AnamnesisMapper.toDTO(anamnesis));
+    }
+
     // ── Patient endpoints ─────────────────────────────────────────────────────
 
     @PostMapping("/my/appointment/{appointmentId}")
