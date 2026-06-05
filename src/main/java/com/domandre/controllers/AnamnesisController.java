@@ -108,7 +108,7 @@ public class AnamnesisController {
     // ── Doctor endpoints ──────────────────────────────────────────────────────
 
     @GetMapping("/appointment/{appointmentId}")
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_DOCTOR', 'ROLE_ADMIN')")
     public ResponseEntity<AnamnesisDTO> getAnamnesisForDoctor(@PathVariable Long appointmentId) {
         User currentUser = userService.getCurrentUser();
         log.info("User {} requesting anamnesis for appointment {}", currentUser.getEmail(), appointmentId);

@@ -174,7 +174,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_DOCTOR', 'ROLE_ADMIN')")
     public ResponseEntity<AppointmentDTO> getAppointmentById(@PathVariable Long id) {
         User currentUser = userService.getCurrentUser();
         log.info("User {} fetching appointment ID={}", currentUser.getEmail(), id);
