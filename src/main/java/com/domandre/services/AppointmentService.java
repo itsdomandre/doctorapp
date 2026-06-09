@@ -18,6 +18,7 @@ import com.domandre.repositories.AppointmentRepository;
 import com.domandre.validators.AppointmentValidator;
 import com.domandre.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -38,10 +39,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final ProcedurePriceService procedurePriceService;
+    private final FinancialEntryService financialEntryService;
 
     public Appointment createAppointment(AppointmentRequest request) throws DateTimeRequestIsNotPermittedException {
         if (!AppointmentValidator.isValidAppointment(request.getDateTime())) {
@@ -128,7 +132,14 @@ public class AppointmentService {
         }
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointment.setUpdatedAt(LocalDateTime.now());
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+
+        procedurePriceService.findByProcedureOptional(saved.getProcedure()).ifPresentOrElse(
+                pp -> financialEntryService.createReceivableFromAppointment(saved, pp.getPrice()),
+                () -> log.warn("No price configured for procedure {}; receivable not created", saved.getProcedure())
+        );
+
+        return saved;
     }
 
     public List<LocalTime> getAvailableSlots(LocalDate date) {

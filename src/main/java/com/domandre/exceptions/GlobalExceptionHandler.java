@@ -120,4 +120,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Failed to send email. Please try again later.", HttpStatus.SERVICE_UNAVAILABLE);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
 }
