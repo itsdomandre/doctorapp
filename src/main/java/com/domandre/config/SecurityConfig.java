@@ -67,7 +67,11 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin(frontendUrl);
+        if ("*".equals(frontendUrl)) {
+            config.addAllowedOriginPattern("*");
+        } else {
+            config.addAllowedOrigin(frontendUrl);
+        }
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();

@@ -94,7 +94,7 @@ Global exception handler maps 11 custom exception types (under `exceptions/`) to
 
 ## Development Notes
 
-- The frontend proxy IP is `192.168.1.9` — update `vite.config.ts` if the machine changes
+- The frontend proxy IP is `192.168.0.35` — update `vite.config.ts` if the machine changes. CORS in dev is set to `app.frontend.url=*` (any origin), so no backend change is needed when the IP changes.
 - Default admin credentials for testing: `deise@example.com` / `Password123!`
 - Default user credentials for testing: `andre@example.com` / `Password123!`
 
