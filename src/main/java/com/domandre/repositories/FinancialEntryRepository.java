@@ -16,9 +16,26 @@ import java.time.LocalDate;
 @Repository
 public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, Long> {
 
-    Page<FinancialEntry> findByType(FinancialEntryType type, Pageable pageable);
+    @Query("SELECT f FROM FinancialEntry f WHERE f.type = :type " +
+           "AND (:status IS NULL OR f.status = :status) " +
+           "AND (:from IS NULL OR f.dueDate >= :from) " +
+           "AND (:to IS NULL OR f.dueDate <= :to)")
+    Page<FinancialEntry> findByFilters(
+            @Param("type") FinancialEntryType type,
+            @Param("status") FinancialEntryStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to,
+            Pageable pageable);
 
-    Page<FinancialEntry> findByTypeAndStatus(FinancialEntryType type, FinancialEntryStatus status, Pageable pageable);
+    @Query("SELECT COALESCE(SUM(f.amount), 0) FROM FinancialEntry f WHERE f.type = :type " +
+           "AND (:status IS NULL OR f.status = :status) " +
+           "AND (:from IS NULL OR f.dueDate >= :from) " +
+           "AND (:to IS NULL OR f.dueDate <= :to)")
+    BigDecimal sumAmountByFilters(
+            @Param("type") FinancialEntryType type,
+            @Param("status") FinancialEntryStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 
     @Query("SELECT COALESCE(SUM(f.amount), 0) FROM FinancialEntry f WHERE f.type = :type AND f.status = :status")
     BigDecimal sumAmountByTypeAndStatus(@Param("type") FinancialEntryType type, @Param("status") FinancialEntryStatus status);

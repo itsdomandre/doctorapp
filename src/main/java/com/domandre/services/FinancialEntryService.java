@@ -52,20 +52,22 @@ public class FinancialEntryService {
         return financialEntryRepository.save(entry);
     }
 
-    public Page<FinancialEntry> findReceivables(FinancialEntryStatus status, int page, int size) {
+    public Page<FinancialEntry> findReceivables(FinancialEntryStatus status, LocalDate from, LocalDate to, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        if (status != null) {
-            return financialEntryRepository.findByTypeAndStatus(FinancialEntryType.RECEIVABLE, status, pageable);
-        }
-        return financialEntryRepository.findByType(FinancialEntryType.RECEIVABLE, pageable);
+        return financialEntryRepository.findByFilters(FinancialEntryType.RECEIVABLE, status, from, to, pageable);
     }
 
-    public Page<FinancialEntry> findPayables(FinancialEntryStatus status, int page, int size) {
+    public BigDecimal sumReceivables(FinancialEntryStatus status, LocalDate from, LocalDate to) {
+        return financialEntryRepository.sumAmountByFilters(FinancialEntryType.RECEIVABLE, status, from, to);
+    }
+
+    public Page<FinancialEntry> findPayables(FinancialEntryStatus status, LocalDate from, LocalDate to, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        if (status != null) {
-            return financialEntryRepository.findByTypeAndStatus(FinancialEntryType.PAYABLE, status, pageable);
-        }
-        return financialEntryRepository.findByType(FinancialEntryType.PAYABLE, pageable);
+        return financialEntryRepository.findByFilters(FinancialEntryType.PAYABLE, status, from, to, pageable);
+    }
+
+    public BigDecimal sumPayables(FinancialEntryStatus status, LocalDate from, LocalDate to) {
+        return financialEntryRepository.sumAmountByFilters(FinancialEntryType.PAYABLE, status, from, to);
     }
 
     public FinancialEntry recordPayment(Long id, RecordPaymentRequest request) {

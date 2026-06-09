@@ -3,6 +3,7 @@ package com.domandre.controllers;
 import com.domandre.controllers.request.CreatePayableRequest;
 import com.domandre.controllers.request.RecordPaymentRequest;
 import com.domandre.controllers.response.FinancialEntryDTO;
+import com.domandre.controllers.response.FinancialEntryPageResponse;
 import com.domandre.controllers.response.FinancialSummaryDTO;
 import com.domandre.enums.FinancialEntryStatus;
 import com.domandre.mappers.FinancialEntryMapper;
@@ -12,10 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,22 +38,36 @@ public class FinancialController {
 
     @GetMapping("/receivables")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<FinancialEntryDTO>> getReceivables(
+    public ResponseEntity<FinancialEntryPageResponse> getReceivables(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) FinancialEntryStatus status) {
-        return ResponseEntity.ok(financialEntryService.findReceivables(status, page, size)
-                .map(FinancialEntryMapper::toDTO));
+            @RequestParam(required = false) FinancialEntryStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDateTo) {
+        Page<FinancialEntryDTO> entries = financialEntryService
+                .findReceivables(status, dueDateFrom, dueDateTo, page, size)
+                .map(FinancialEntryMapper::toDTO);
+        return ResponseEntity.ok(new FinancialEntryPageResponse(
+                entries.getContent(), entries.getTotalElements(), entries.getTotalPages(),
+                entries.getNumber(), entries.getSize(),
+                financialEntryService.sumReceivables(status, dueDateFrom, dueDateTo)));
     }
 
     @GetMapping("/payables")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<FinancialEntryDTO>> getPayables(
+    public ResponseEntity<FinancialEntryPageResponse> getPayables(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) FinancialEntryStatus status) {
-        return ResponseEntity.ok(financialEntryService.findPayables(status, page, size)
-                .map(FinancialEntryMapper::toDTO));
+            @RequestParam(required = false) FinancialEntryStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDateTo) {
+        Page<FinancialEntryDTO> entries = financialEntryService
+                .findPayables(status, dueDateFrom, dueDateTo, page, size)
+                .map(FinancialEntryMapper::toDTO);
+        return ResponseEntity.ok(new FinancialEntryPageResponse(
+                entries.getContent(), entries.getTotalElements(), entries.getTotalPages(),
+                entries.getNumber(), entries.getSize(),
+                financialEntryService.sumPayables(status, dueDateFrom, dueDateTo)));
     }
 
     @PostMapping("/payables")
