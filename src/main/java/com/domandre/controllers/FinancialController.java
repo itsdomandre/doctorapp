@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/financial")
-@PreAuthorize("hasRole('ADMIN')")
 @SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class FinancialController {
@@ -28,11 +27,13 @@ public class FinancialController {
     private final FinancialEntryService financialEntryService;
 
     @GetMapping("/summary")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FinancialSummaryDTO> getSummary() {
         return ResponseEntity.ok(financialEntryService.getSummary());
     }
 
     @GetMapping("/receivables")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<FinancialEntryDTO>> getReceivables(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -42,6 +43,7 @@ public class FinancialController {
     }
 
     @GetMapping("/payables")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<FinancialEntryDTO>> getPayables(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -51,6 +53,7 @@ public class FinancialController {
     }
 
     @PostMapping("/payables")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FinancialEntryDTO> createPayable(@Valid @RequestBody CreatePayableRequest request) {
         log.info("Creating manual payable: {}", request.getDescription());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,6 +61,7 @@ public class FinancialController {
     }
 
     @PatchMapping("/{id}/pay")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FinancialEntryDTO> recordPayment(
             @PathVariable Long id,
             @Valid @RequestBody RecordPaymentRequest request) {
@@ -66,6 +70,7 @@ public class FinancialController {
     }
 
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FinancialEntryDTO> cancel(@PathVariable Long id) {
         log.info("Cancelling financial entry ID={}", id);
         return ResponseEntity.ok(FinancialEntryMapper.toDTO(financialEntryService.cancel(id)));

@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/procedure-prices")
-@PreAuthorize("hasRole('ADMIN')")
 @SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class ProcedurePriceController {
@@ -28,6 +27,7 @@ public class ProcedurePriceController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProcedurePriceDTO>> getAll() {
         List<ProcedurePriceDTO> prices = procedurePriceService.findAll()
                 .stream()
@@ -37,6 +37,7 @@ public class ProcedurePriceController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProcedurePriceDTO> upsert(@Valid @RequestBody ProcedurePriceRequest request) {
         User admin = userService.getCurrentUser();
         log.info("ADMIN {} updating price for procedure: {}", admin.getEmail(), request.getProcedure());
